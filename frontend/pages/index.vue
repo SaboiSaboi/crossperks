@@ -1,51 +1,58 @@
 <template>
   <div
-    class="min-h-screen flex flex-col justify-center items-center bg-cyan-900 text-white font-roboto w-full"
+    class="min-h-screen flex flex-col justify-center items-center bg-[#00C4CC] text-white font-roboto w-full"
   >
     <Header />
 
     <div
-      class="flex flex-col md:flex-row items-center gap-6 md:gap-8 lg:max-w-[87rem] mx-auto mb-24"
+      class="flex flex-col md:flex-row items-center gap-6 md:gap-8 lg:max-w-[87rem] mx-auto mb-24 p-16 bg-slate-500 sm:bg-lime-400 md:bg-blue-800 lg:bg-gray-900 rounded-lg"
     >
       <!-- Text Section -->
-      <section class="flex flex-col gap-4 w-full md:w-1/2 md:text-left py-4">
-        <div class="px-6">
+      <section class="flex flex-col gap-8 w-full md:w-1/2 md:text-left py-4">
+        <div class="">
           <!-- Tagline (visible when showTagline is true) -->
           <p
             v-if="showTagline"
-            class="text-cyan-200 font-normal leading-relaxed text-4xl md:text-5xl lg:text-7xl h-[5rem] md:h-[7.8rem] lg:h-[12.8rem]"
+            class="text-cyan-200 font-normal leading-relaxed text-4xl md:text-5xl lg:text-5xl h-[5rem] md:h-[7.8rem] lg:h-fit"
           >
-            Earn Perks & Support Local Spots Like
+            Enjoy Surprise Perks & <br />Support Local Businesses Like
           </p>
           <!-- Typing Text -->
           <p
-            class="typing font-bold text-yellow-300 text-4xl md:text-3xl lg:text-5xl h-[5rem] md:h-[7rem] lg:h-[7rem] pt-4"
+            class="w-[29rem] typing font-bold text-yellow-300 text-4xl md:text-3xl lg:text-5xl h-[5rem] md:h-[7rem] lg:h-[7rem] pt-4"
           >
             {{ typedText }}
           </p>
         </div>
 
         <!-- Descriptive Text -->
-        <p
-          class="text-lg md:text-xl text-cyan-200 font-normal px-6 lg:px-3 lg:text-3xl"
-        >
-          Shop as usual—get rewarded when you check out.
+        <p class="text-lg md:text-xl text-cyan-200 font-normal lg:text-2xl">
+          Shop as usual — Enjoy Surprise Perks along the way.
           <br class="hidden md:block" />
           <span class="text-cyan-200">
             Support businesses that match your values.
           </span>
         </p>
+        <div>
+          <button
+            class="mt-6 px-8 py-4 bg-green-900 text-white rounded-full hover:bg-green-700 transition"
+          >
+            Join Now
+          </button>
+        </div>
       </section>
 
       <!-- Image Section -->
+      <!-- <section class="bg-slate-300 flex justify-center h-96"> -->
       <NuxtImg
         src="https://images.pexels.com/photos/3907306/pexels-photo-3907306.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
         alt="Perks Illustration"
-        class="w-full md:w-1/2 max-w-md md:max-w-none object-cover sm:rounded-lg shadow-lg transition-transform hover:scale-105 duration-500"
+        class="w-full md:w-[35rem] max-w-md md:max-w-none object-cover sm:rounded-lg shadow-lg transition-transform hover:scale-105 duration-1000"
       />
+      <!-- </section> -->
     </div>
 
-    <div
+    <!-- <div
       class="bg-white p-8 rounded-lg shadow-xl w-[90%] sm:w-[34rem] text-gray-800 mb-24"
     >
       <h2
@@ -106,72 +113,145 @@
       >
         {{ successMessage }}
       </p>
-    </div>
-    <div class="py-16 bg-gray-100 text-gray-900 w-full">
-      <div class="max-w-5xl mx-auto text-center">
-        <h2 class="text-4xl font-extrabold text-gray-800">
-          How CrossPerks Works
-        </h2>
-        <p class="text-lg text-gray-600 mt-4 text-balance">
-          Earn rewards effortlessly while supporting your favorite local
-          businesses.
-        </p>
+    </div> -->
+    <!-- <div class="p-16 bg-slate-700 w-full h-[25rem]">
+      <div class="flex justify-center gap-4">
+        <Button class="text-3xl rounded-[2rem] p-6">Shop</Button>
+        <Button class="text-3xl rounded-[2rem] p-6">Scan</Button>
+        <Button class="text-3xl rounded-[2rem] p-6">Get Perks</Button>
+        <Button class="text-3xl rounded-[2rem] p-6">Repeat</Button>
       </div>
+    </div> -->
 
-      <div
-        class="mt-12 flex flex-col lg:flex-row items-center justify-center space-y-12 lg:space-y-0 lg:space-x-16 max-w-6xl mx-auto"
-      >
-        <div class="flex flex-col items-center text-center">
-          <NuxtImg
-            src="https://images.pexels.com/photos/3184183/pexels-photo-3184183.jpeg"
-            alt="Visit Local Business"
-            class="w-72 h-72 rounded-lg shadow-lg object-cover transition-transform hover:scale-105 duration-1000"
-          />
-          <p class="mt-4 text-xl font-semibold">Visit Local Businesses</p>
-          <p class="w-[90%] md:w-full text-balance text-gray-600">
-            Grab a coffee, hit the gym, or book a spa treatment—just like
-            normal.
-          </p>
-        </div>
-
-        <div class="flex flex-col items-center text-center">
-          <NuxtImg
-            src="https://images.pexels.com/photos/3183171/pexels-photo-3183171.jpeg"
-            alt="Check Out & Unlock Perks"
-            class="w-72 h-72 rounded-lg shadow-lg object-cover transition-transform hover:scale-105 duration-1000"
-          />
-          <p class="mt-4 text-xl font-semibold">Check Out & Unlock Perks</p>
-          <p class="text-balance text-gray-600 w-[90%] md:w-full">
-            Scan your CrossPerks QR code at checkout & unlock a surprise perk!
-          </p>
-        </div>
-
-        <div class="flex flex-col items-center text-center">
-          <NuxtImg
-            src="https://images.pexels.com/photos/3997997/pexels-photo-3997997.jpeg"
-            alt="Redeem Perks"
-            class="w-72 h-72 rounded-lg shadow-lg object-cover transition-transform hover:scale-105 duration-1000"
-          />
-          <p class="mt-4 text-xl font-semibold">
-            Redeem Perks at Partner Businesses
-          </p>
-          <p class="text-balance text-gray-600">
-            Use your perk at another awesome local business—keep the cycle
-            going!
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="h-52 w-full bg-gray-950 text-white">
-      <div class="h-full flex flex-col md:flex-row lg:flex-col justify-between">
-        <div class="mb-4 md:mb-0 h-full flex items-center justify-center">
-          <div class="text-sm text-white text-center w-[80%] md:w-full">
-            &copy; 2025, CrossPerks - All rights reserved.
+    <!-- Visual Storytelling Section -->
+    <div class="min-h-screen bg-slate-50 text-slate-900 w-full">
+      <section class="py-24 px-10 flex flex-col gap-20">
+        <!-- Step 1: Shop -->
+        <div class="flex items-center gap-20 mx-auto">
+          <div class="flex-1">
+            <h2 class="text-4xl font-bold mb-4">Shop at Local Businesses</h2>
+            <p class="text-lg text-slate-600">
+              Visit your favorite CrossPerks partner businesses and discover
+              special offers while enjoying your usual purchases.
+            </p>
+            <div
+              class="mt-6 p-6 border border-slate-300 rounded-xl shadow-sm hover:shadow-md transition"
+            >
+              <h3 class="font-semibold">🛍️ Shop</h3>
+              <p class="text-slate-500 mt-2">
+                Explore new places or revisit your go-to spots for everyday
+                purchases.
+              </p>
+            </div>
+          </div>
+          <div class="flex-1">
+            <div
+              class="w-full h-96 bg-cover bg-center rounded-2xl shadow-lg"
+              style="
+                background-image: url('https://images.pexels.com/photos/4056722/pexels-photo-4056722.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+              "
+            ></div>
           </div>
         </div>
-      </div>
+
+        <!-- Step 2: Scan -->
+        <div class="flex items-center gap-20 mx-auto flex-row-reverse">
+          <div class="flex-1">
+            <h2 class="text-4xl font-bold mb-4">Scan the QR Code</h2>
+            <p class="text-lg text-slate-600">
+              Quickly scan the business's CrossPerks QR code with your phone to
+              unlock exclusive rewards.
+            </p>
+            <div
+              class="mt-6 p-6 border border-slate-300 rounded-xl shadow-sm hover:shadow-md transition"
+            >
+              <h3 class="font-semibold">📱 Scan</h3>
+              <p class="text-slate-500 mt-2">
+                One quick scan connects you to surprise perks and exclusive
+                deals.
+              </p>
+            </div>
+          </div>
+          <div class="flex-1">
+            <div
+              class="w-full h-96 bg-cover bg-center rounded-2xl shadow-lg"
+              style="
+                background-image: url('https://images.pexels.com/photos/7289717/pexels-photo-7289717.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+              "
+            ></div>
+          </div>
+        </div>
+
+        <!-- Step 3: Get Perks -->
+        <div class="flex items-center gap-12 max-w-6xl mx-auto">
+          <div class="flex-1">
+            <h2 class="text-4xl font-bold mb-4">Get Surprise Perks</h2>
+            <p class="text-lg text-slate-600">
+              Unlock discounts, freebies, or special rewards tailored to your
+              shopping experience.
+            </p>
+            <div
+              class="mt-6 p-6 border border-slate-300 rounded-xl shadow-sm hover:shadow-md transition"
+            >
+              <h3 class="font-semibold">🎁 Get Perks</h3>
+              <p class="text-slate-500 mt-2">
+                Your loyalty earns you unexpected rewards every time.
+              </p>
+            </div>
+          </div>
+          <div class="flex-1">
+            <div
+              class="w-full h-80 bg-cover bg-center rounded-2xl shadow-lg"
+              style="
+                background-image: url('https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+              "
+            ></div>
+          </div>
+        </div>
+
+        <!-- Step 4: Repeat -->
+        <div
+          class="flex items-center gap-12 max-w-6xl mx-auto flex-row-reverse"
+        >
+          <div class="flex-1">
+            <h2 class="text-4xl font-bold mb-4">Repeat and Keep Earning</h2>
+            <p class="text-lg text-slate-600">
+              Redeem your perks at any participating business and keep the
+              rewards flowing.
+            </p>
+            <div
+              class="mt-6 p-6 border border-slate-300 rounded-xl shadow-sm hover:shadow-md transition"
+            >
+              <h3 class="font-semibold">🔄 Repeat</h3>
+              <p class="text-slate-500 mt-2">
+                Continue your journey, unlocking more perks as you go.
+              </p>
+            </div>
+          </div>
+          <div class="flex-1">
+            <div
+              class="w-full h-80 bg-cover bg-center rounded-2xl shadow-lg"
+              style="
+                background-image: url('https://images.pexels.com/photos/16838917/pexels-photo-16838917/free-photo-of-repeat-until-funny.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
+              "
+            ></div>
+          </div>
+        </div>
+      </section>
     </div>
+
+    <!-- Call to Action Section -->
+    <section class="py-24 bg-slate-900 text-white text-center w-full">
+      <h2 class="text-4xl font-bold mb-6">Ready to Unlock Your Perks?</h2>
+      <button
+        class="mt-4 px-10 py-4 bg-white text-slate-900 rounded-full hover:bg-slate-200 transition mb-24"
+      >
+        Get Started
+      </button>
+      <div class="text-sm text-white text-center w-[80%] md:w-full">
+        &copy; 2025, CrossPerks - All rights reserved.
+      </div>
+    </section>
   </div>
 </template>
 
@@ -197,7 +277,7 @@ const businesses = [
   "Green Spa",
   "Honey Latte Cafe",
   "Book Haven",
-  "Above ground Coffee House",
+  "Above ground Coffee House in Portland City",
 ];
 const typedText = ref("");
 let isTyping = false;
