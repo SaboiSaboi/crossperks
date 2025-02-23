@@ -3,10 +3,9 @@
     class="min-h-screen flex flex-col justify-center items-center bg-[#007B82] text-white font-roboto w-full"
   >
     <Header />
-    <!-- lg:bg-blue-950 -->
 
     <div
-      class="flex flex-col items-center gap-6 mb-24 p-4 sm:p-16 rounded-lg w-full lg:flex lg:flex-row lg:gap-4"
+      class="flex flex-col items-center gap-6 p-4 sm:p-16 rounded-lg w-full lg:flex lg:flex-row lg:gap-4"
     >
       <!-- Text Section -->
       <section class="flex flex-col gap-8 w-full lg:w-1/2 lg:text-left py-4">
@@ -34,9 +33,9 @@
             Support businesses that match your values.
           </span>
         </p>
-        <div class="flex justify-center items-center">
+        <div class="flex justify-start items-center">
           <button
-            class="mt-6 px-8 py-4 bg-[#FFB347] text-[#333333] font-semibold rounded-full hover:bg-[#E1A300] transition"
+            class="text-2xl px-8 py-4 bg-[#FFB347] text-[#333333] font-semibold rounded-full hover:bg-[#E1A300] transition"
           >
             Join Now
           </button>
@@ -53,6 +52,8 @@
       </div>
     </div>
 
+    <Clients />
+
     <div
       class="min-h-screen bg-gradient-to-b from-[#D1F2EB] to-[#F5F5F5] text-[#2E294E] w-full"
     >
@@ -63,9 +64,10 @@
         >
           <div class="md:flex-1">
             <h2
-              class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 tracking-wide"
+              class="flex gap-6 items-center text-3xl sm:text-4xl md:text-5xl font-bold mb-6 tracking-wide"
             >
-              Shop at Local Businesses
+              <div class="text-7xl">1.</div>
+              <div>Shop at Local Businesses</div>
             </h2>
             <p class="text-lg text-[#4A4A4A] leading-relaxed">
               Visit your favorite CrossPerks partner businesses and discover
@@ -74,15 +76,6 @@
               Explore new places or revisit your go-to spots for everyday
               purchases.
             </p>
-            <div
-              class="mt-8 p-4 w-fit border border-[#B77B57] rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-transform duration-500"
-            >
-              <h3 class="font-semibold">🛍️ Shop</h3>
-              <!-- <p class="text-[#4A4A4A] mt-4 leading-relaxed">
-                Explore new places or revisit your go-to spots for everyday
-                purchases.
-              </p> -->
-            </div>
           </div>
           <div class="md:flex-1 w-full">
             <div
@@ -99,20 +92,21 @@
         >
           <div class="md:flex-1 md:w-[49rem]">
             <h2
-              class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 tracking-wide"
+              class="flex gap-6 items-center text-3xl sm:text-4xl md:text-5xl font-bold mb-6 tracking-wide"
             >
-              Scan the QR Code
+              <div class="text-7xl">2.</div>
+              <div>Scan the QR Code</div>
             </h2>
             <p class="text-lg text-[#4A4A4A] leading-relaxed">
               Quickly scan the business's CrossPerks QR code with your phone to
               unlock exclusive rewards. One quick scan connects you to surprise
               perks and exclusive deals.
             </p>
-            <div
+            <!-- <div
               class="w-fit mt-8 p-4 border border-[#B77B57] rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-transform duration-500"
             >
               <h3 class="font-semibold">📱 Scan</h3>
-            </div>
+            </div> -->
           </div>
           <div class="md:flex-1 w-full">
             <div class="md:flex-1 w-full">
@@ -131,8 +125,9 @@
         >
           <div class="md:flex-1 md:w-[49rem]">
             <h2
-              class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 tracking-wide"
+              class="flex gap-6 text-3xl sm:text-4xl md:text-5xl font-bold mb-6 tracking-wide"
             >
+              <div class="text-7xl">3.</div>
               Get Surprise Perks
             </h2>
             <p class="text-lg text-[#4A4A4A] leading-relaxed">
@@ -140,11 +135,11 @@
               shopping experience. Your loyalty earns you unexpected rewards
               every time.
             </p>
-            <div
+            <!-- <div
               class="mt-8 p-4 border border-[#B77B57] rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-transform duration-500 w-fit"
             >
               <h3 class="font-semibold">🎁 Get Perks</h3>
-            </div>
+            </div> -->
           </div>
           <div class="md:flex-1 w-full">
             <div
@@ -161,8 +156,9 @@
         >
           <div class="md:flex-1 md:w-[49rem]">
             <h2
-              class="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 tracking-wide"
+              class="flex gap-6 text-3xl sm:text-4xl md:text-5xl font-bold mb-6 tracking-wide"
             >
+              <div class="text-7xl">4.</div>
               Repeat and Keep Earning
             </h2>
             <p class="text-lg text-[#4A4A4A] leading-relaxed">
@@ -170,14 +166,11 @@
               rewards flowing. Continue your journey, unlocking more perks as
               you go.
             </p>
-            <div
+            <!-- <div
               class="w-fit mt-8 p-4 border border-[#B77B57] rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-transform duration-500"
             >
               <h3 class="font-semibold">🔄 Repeat</h3>
-              <!-- <p class="text-[#4A4A4A] mt-4 leading-relaxed">
-                Continue your journey, unlocking more perks as you go.
-              </p> -->
-            </div>
+            </div> -->
           </div>
           <div class="md:flex-1 w-full">
             <div
@@ -192,17 +185,17 @@
     </div>
 
     <!-- Call to Action Section -->
-    <section class="py-24 bg-[#007B82] text-white text-center w-full">
+    <section
+      class="py-16 bg-[#007B82] text-white text-center w-full justify-center items-center"
+    >
       <h2 class="text-4xl font-bold mb-6">Ready to Unlock Your Perks?</h2>
       <button
-        class="mt-4 px-10 py-4 bg-[#FFB347] text-[#333333] rounded-full hover:bg-[#E1A300] transition mb-24"
+        class="mt-4 px-10 py-4 bg-[#FFB347] text-[#333333] rounded-full hover:bg-[#E1A300] transition"
       >
         Get Started
       </button>
-      <div class="text-sm text-white text-center w-[80%] md:w-full">
-        &copy; 2025, CrossPerks - All rights reserved.
-      </div>
     </section>
+    <Footer />
   </div>
 </template>
 
