@@ -36,15 +36,7 @@ export const UserSchema = z.object({
   user: z.object({
     id: z.number(),
     email: z.string().email(),
-    role: UserRoleSchema,
-    firstName: z.string(),
-    lastName: z.string(),
-    position: z.string(),
-  }),
-  company: z.object({
-    id: z.number(),
-    name: z.string().nullable(),
-    admin_id: z.number(),
+    user_type: z.string(),
   }),
   auth_token: z.string(),
 });
@@ -54,12 +46,8 @@ export const UserSchemaLogin = z.object({
   user: z.object({
     id: z.number(),
     email: z.string().email(),
-    role: UserRoleSchema,
-  }),
-  company: z.object({
-    id: z.number(),
-    name: z.string().nullable(),
-    admin_id: z.number(),
+    name: z.string(),
+    user_type: z.string(),
   }),
   auth_token: z.string(),
 });

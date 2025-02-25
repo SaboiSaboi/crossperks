@@ -2,11 +2,13 @@ import random
 from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import CustomUser
 from .serializers import UserRegistrationSerializer
+from knox.models import AuthToken
+from django.contrib.auth import authenticate
 
 
 class SendVerificationCodeView(APIView):
@@ -102,3 +104,82 @@ class CompleteRegistrationView(generics.CreateAPIView):
                 {"error": "Email not verified or user not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+
+class LoginView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+        password = request.data.get("password")
+
+        if not email or not password:
+            return Response({"error": "Email and password are required."}, status=400)
+
+        user = authenticate(request, username=email, password=password)
+        if user is None:
+            return Response({"error": "Invalid email or password."}, status=400)
+
+        _, token = AuthToken.objects.create(user)
+
+        response_data = {
+            "message": "Login successful",
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "name": user.name,
+                "user_type": user.user_type,
+            },
+            "auth_token": token,
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from knox.auth import TokenAuthentication
+
+
+class GetUserAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        auth_header = request.META.get("HTTP_AUTHORIZATION")
+        token = (
+            auth_header.split(" ")[1]
+            if auth_header and auth_header.startswith("Token ")
+            else None
+        )
+
+        user = request.user
+
+        role = user.user_type if hasattr(user, "user_type") else "Unknown"
+        company = getattr(user, "company", None)
+
+        response_data = {
+            "message": "User data retrieved successfully",
+            "user": {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "user_type": role,
+            },
+            "auth_token": token,
+        }
+
+        if company:
+            response_data["company"] = {
+                "id": company.id,
+                "name": company.name,
+                "admin_id": getattr(company.admin, "id", None),
+                "created_at": company.created_at,
+            }
+        else:
+            response_data["company"] = None
+
+        return Response(response_data, status=status.HTTP_200_OK)
