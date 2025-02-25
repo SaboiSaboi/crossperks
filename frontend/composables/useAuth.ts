@@ -8,7 +8,6 @@ import {
 } from "~/utils/schemas/auth";
 
 export const useAuthS = () => {
-  // Step 1: Send Verification Code
   async function sendVerificationCode(
     userInfo: z.infer<typeof RegisterUserSchema>
   ) {
@@ -21,7 +20,6 @@ export const useAuthS = () => {
     return data;
   }
 
-  // Step 2: Verify the Code
   async function verifyEmailCode({
     email,
     code,
