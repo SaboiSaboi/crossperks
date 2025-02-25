@@ -18,9 +18,10 @@
                 :key="index"
                 class="flex flex-col items-center"
               >
-                <span class="text-base text-white w-24 flex text-center">{{
-                  client.name
-                }}</span>
+                <span
+                  class="text-base text-white w-24 flex text-center font-extrabold justify-center"
+                  >{{ client.name }}</span
+                >
               </li>
             </ul>
 
@@ -33,9 +34,10 @@
                 :key="`duplicate-${index}`"
                 class="flex flex-col items-center"
               >
-                <span class="text-base text-white w-24 text-center">{{
-                  client.name
-                }}</span>
+                <span
+                  class="text-base text-white w-24 flex justify-center text-center font-extrabold"
+                  >{{ client.name }}</span
+                >
               </li>
             </ul>
           </div>

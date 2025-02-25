@@ -6,7 +6,7 @@ import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
   <header class="z-30 w-full sm:px-2 py-4">
     <div class="mx-auto max-w-7xl px-4 sm:px-0">
       <div
-        class="relative flex h-16 items-center justify-between gap-3 rounded-2xl px-8 bg-[#EFBF04]"
+        class="relative flex h-16 items-center justify-between gap-3 rounded-2xl px-8 border-2 border-[#EFBF04]"
       >
         <div class="flex flex-1 items-center">
           <router-link
@@ -22,34 +22,28 @@ import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
         <nav class="hidden md:flex md:grow md:justify-end">
           <NavigationMenu>
             <NavigationMenuList class="flex gap-7">
-              <NavigationMenuItem
-                class="text-black hover:text-[#F5F5F5] transition-colors"
-              >
+              <NavigationMenuItem class="text-slate-200 hover:text-slate-50">
+                <NavigationMenuLink href="/business">
+                  <p class="hover:underline text-2xl">Business</p>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem class="text-black transition-colors">
                 <NavigationMenuLink
-                  href="#waitlist"
-                  :class="navigationMenuTriggerStyle()"
+                  href="/signin"
+                  class="text-slate-200 hover:text-slate-50"
                 >
-                  Business
+                  <p class="hover:underline text-2xl">Sign in</p>
                 </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem
-                class="text-black hover:text-[#F5F5F5] transition-colors"
+                class="text-black text-2xl hover:text-[#F5F5F5] transition-colors border-10 border-black"
               >
                 <NavigationMenuLink
-                  href="#waitlist"
+                  href="/signup"
                   :class="navigationMenuTriggerStyle()"
+                  class="bg-slate-200 hover:bg-slate-50 border-[1.5px] border-black"
                 >
-                  Sign In
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem
-                class="text-black hover:text-[#F5F5F5] transition-colors"
-              >
-                <NavigationMenuLink
-                  href="#about"
-                  :class="navigationMenuTriggerStyle()"
-                >
-                  Join Now
+                  <p class="text-2xl">Join Now</p>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>

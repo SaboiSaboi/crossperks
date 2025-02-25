@@ -3,7 +3,8 @@
     class="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-10"
   >
     <!-- Header -->
-    <h1 class="text-5xl font-bold mb-10">CrossPerks</h1>
+    <NuxtLink to="/" class="text-3xl font-bold mb-6">CrossPerks</NuxtLink>
+    <h2 class="text-4xl mb-10">Create an Account</h2>
 
     <!-- Selection Toggle -->
     <div class="flex gap-6 mb-8">
@@ -32,12 +33,18 @@
     <!-- Form Section -->
     <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
       <form @submit.prevent="handleSubmit">
-        <div v-if="selected === 'customer'">
-          <label class="block mb-2 font-medium">Name</label>
+        <div v-if="selected === 'customer' || selected === 'business'">
+          <label class="block mb-2 font-medium">{{
+            selected === "customer" ? "Name" : "Business Name"
+          }}</label>
           <input
             type="text"
-            placeholder="Your Name"
+            :placeholder="
+              selected === 'customer' ? 'Your Name' : 'Your Business Name'
+            "
             class="w-full p-3 mb-4 border rounded-lg"
+            v-model="userName"
+            :disabled="emailSent"
           />
 
           <label class="block mb-2 font-medium">Email</label>
@@ -45,84 +52,157 @@
             type="email"
             placeholder="Your Email"
             class="w-full p-3 mb-4 border rounded-lg"
+            v-model="userEmail"
+            :disabled="emailSent"
           />
 
-          <label class="block mb-2 font-medium">Confirm Email</label>
-          <input
-            type="email"
-            placeholder="Confirm Email"
-            class="w-full p-3 mb-6 border rounded-lg"
-          />
+          <button
+            v-if="!emailSent"
+            type="button"
+            :disabled="!userName || !userEmail"
+            :class="[
+              !userName || !userEmail
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-500',
+              'w-full py-2 text-white rounded-lg transition mb-4',
+            ]"
+            @click="sendVerificationCode"
+          >
+            Send Verification Code
+          </button>
+
+          <div v-if="emailSent && !isVerified">
+            <label class="block mb-2 font-medium"
+              >Enter Verification Code</label
+            >
+            <input
+              type="text"
+              placeholder="Verification Code"
+              class="w-full p-3 mb-4 border rounded-lg"
+              v-model="verificationCode"
+            />
+            <button
+              type="button"
+              :disabled="!verificationCode"
+              :class="[
+                !verificationCode
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-500',
+                'w-full py-2 text-white rounded-lg transition mb-4',
+              ]"
+              @click="verifyCode"
+            >
+              Verify Code
+            </button>
+          </div>
+
+          <div v-if="isVerified">
+            <label class="block mb-2 font-medium">Password</label>
+            <input
+              type="password"
+              placeholder="Password"
+              class="w-full p-3 mb-4 border rounded-lg"
+              v-model="userPassword"
+            />
+
+            <label class="block mb-2 font-medium">Confirm Password</label>
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              class="w-full p-3 mb-4 border rounded-lg"
+              v-model="confirmPassword"
+            />
+            <button
+              type="submit"
+              class="w-full py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-700 transition"
+            >
+              Complete Registration
+            </button>
+          </div>
         </div>
-
-        <div v-if="selected === 'business'">
-          <label class="block mb-2 font-medium">Business Name</label>
-          <input
-            type="text"
-            placeholder="Your Business Name"
-            class="w-full p-3 mb-4 border rounded-lg"
-          />
-
-          <label class="block mb-2 font-medium">Business Email</label>
-          <input
-            type="email"
-            placeholder="Business Email"
-            class="w-full p-3 mb-4 border rounded-lg"
-          />
-
-          <label class="block mb-2 font-medium">Confirm Email</label>
-          <input
-            type="email"
-            placeholder="Confirm Email"
-            class="w-full p-3 mb-6 border rounded-lg"
-          />
-        </div>
-
-        <button
-          type="submit"
-          class="w-full py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-700 transition"
-        >
-          Sign Up
-        </button>
       </form>
-
-      <!-- Alternative Sign Up Methods -->
-      <div class="text-center mt-6">
-        <p class="text-slate-500">Or Continue with</p>
-        <div class="flex justify-center gap-4 mt-4">
-          <button class="px-6 py-3 bg-slate-200 rounded-lg hover:bg-slate-300">
-            Google
-          </button>
-          <button class="px-6 py-3 bg-slate-200 rounded-lg hover:bg-slate-300">
-            Apple
-          </button>
-        </div>
-      </div>
-
-      <!-- Terms and Login -->
-      <p class="text-xs text-slate-400 mt-6 text-center">
-        By continuing, you acknowledge that you understand and agree to the
-        <a href="#" class="underline">Terms & Conditions</a> and
-        <a href="#" class="underline">Privacy Policy</a>.
-      </p>
-
-      <p class="text-sm text-center mt-4">
-        Already have an account?
-        <a href="#" class="text-slate-900 font-medium underline"
-          >Login instead</a
-        >
-      </p>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref } from "vue";
+<script setup lang="ts">
+import { ref, computed } from "vue";
 
 const selected = ref("customer");
+const userName = ref("");
+const userEmail = ref("");
+const verificationCode = ref("");
+const userPassword = ref("");
+const confirmPassword = ref("");
+const emailSent = ref(false);
+const isVerified = ref(false);
 
-const handleSubmit = () => {
-  alert(`Signing up as a ${selected.value}`);
+const canSendVerification = computed(() => userName.value && userEmail.value);
+
+const handleSubmit = async () => {
+  if (isVerified.value) {
+    await completeRegistration();
+  }
+};
+
+const sendVerificationCode = async () => {
+  try {
+    const response = await $fetch("http://localhost:8000/account/send-code/", {
+      method: "POST",
+      body: {
+        name: userName.value,
+        email: userEmail.value,
+        user_type: selected.value,
+      },
+    });
+    console.log(response);
+    emailSent.value = true;
+    isVerified.value = false; // Trigger showing the code input field immediately
+  } catch (error) {
+    console.error("Failed to send verification code:", error);
+  }
+};
+
+const verifyCode = async () => {
+  if (!verificationCode.value) return;
+  try {
+    const response = await $fetch(
+      "http://localhost:8000/account/verify-code/",
+      {
+        method: "POST",
+        body: {
+          email: userEmail.value,
+          code: verificationCode.value,
+        },
+      }
+    );
+    console.log(response);
+    isVerified.value = true;
+  } catch (error) {
+    alert("Invalid verification code.");
+  }
+};
+
+const completeRegistration = async () => {
+  if (userPassword.value !== confirmPassword.value) {
+    alert("Passwords do not match.");
+    return;
+  }
+  try {
+    const response = await $fetch(
+      "http://localhost:8000/account/complete-registration/",
+      {
+        method: "POST",
+        body: {
+          email: userEmail.value,
+          password: userPassword.value,
+        },
+      }
+    );
+    console.log("Registration complete:", response);
+  } catch (error) {
+    console.error("Failed to complete registration:", error);
+  }
 };
 </script>
 

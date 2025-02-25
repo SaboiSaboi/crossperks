@@ -64,30 +64,14 @@ export const UserSchemaLogin = z.object({
   auth_token: z.string(),
 });
 
-export const RegisterCompanySchema = z.object({
-  first_name: z.string(),
-  last_name: z.string(),
+export const RegisterUserSchema = z.object({
+  name: z.string(),
   email: z.string().email(),
-  position: z.string(),
   password: z.string().min(8, "You need at least 8 characters."),
-  company_name: z.string(),
-});
-export const RegisterInvitedUserSchema = z.object({
-  first_name: z.string(),
-  last_name: z.string(),
-  email: z.string().email(),
-  position: z.string(),
-  password: z.string(),
-  token: z.string(),
+  user_type: z.string(),
 });
 
 export const UserLoginSchema = z.object({
   email: z.string().email(),
   password: z.string(),
-});
-
-export const AcceptInviteSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
-  token: z.string(),
 });
