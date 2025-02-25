@@ -68,29 +68,6 @@ const router = useRouter();
 const handleSignIn = () => {
   authStore.login({ email: email.value, password: password.value });
 };
-
-// const handleSignIn = async () => {
-//   if (!email.value || !password.value) {
-//     alert("Please fill in both email and password.");
-//     return;
-//   }
-
-//   try {
-//     const response: any = await $fetch("http://localhost:8000/account/login/", {
-//       method: "POST",
-//       body: {
-//         email: email.value,
-//         password: password.value,
-//       },
-//     });
-//     console.log("Sign-in successful:", response);
-//     document.cookie = `auth_token=${response.auth_token};path=/`;
-//     router.push("/dashboard");
-//   } catch (error) {
-//     alert("Invalid email or password.");
-//     console.error("Sign-in failed:", error);
-//   }
-// };
 </script>
 
 <style>

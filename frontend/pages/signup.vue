@@ -2,11 +2,9 @@
   <div
     class="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-10"
   >
-    <!-- Header -->
     <NuxtLink to="/" class="text-3xl font-bold mb-6">CrossPerks</NuxtLink>
     <h2 class="text-4xl mb-10">Create an Account</h2>
 
-    <!-- Selection Toggle -->
     <div class="flex gap-6 mb-8">
       <button
         :class="{
@@ -157,7 +155,7 @@ const sendVerificationCode = async () => {
     });
     console.log(response);
     emailSent.value = true;
-    isVerified.value = false; // Trigger showing the code input field immediately
+    isVerified.value = false;
   } catch (error) {
     console.error("Failed to send verification code:", error);
   }
