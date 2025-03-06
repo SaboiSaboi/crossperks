@@ -1,22 +1,39 @@
 # Ignore environment files
 .env
 
-# Ignore Python virtual environment
+# Ignore Python virtual environments
 env/
+venv/
+.venv/
 
-# Python-related
+# Ignore compiled Python files
 __pycache__/
 *.py[cod]
+*.pyo
 
-# Virtual environments
-venv/
-.env/
+# Ignore Django-specific files
+/media/  # Uploaded media files
+staticfiles/  # Collected static files
 
-# Django-specific
-db.sqlite3
-/media/
-staticfiles/
-
-# Logs
+# Ignore logs
 logs/
 *.log
+s3_upload_debug.log
+gunicorn.log
+
+# Ignore PostgreSQL-related files
+pgdata/  # If using Docker for PostgreSQL
+*.pgsql  # Dump files from `pg_dump`
+
+# Ignore IDE/editor files
+.vscode/
+.idea/
+*.swp  # Vim swap files
+
+# Ignore system-generated files
+.DS_Store
+Thumbs.db
+
+# Ignore Docker-related files (if using Docker)
+docker-compose.override.yml
+*.dockerfile
