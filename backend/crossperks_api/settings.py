@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from datetime import timedelta
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-3*hl$yah0$6fi7c=2@e^)lnboz+=p6)^qn(**-zhp^u7#wtzll"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 AUTH_USER_MODEL = "account.CustomUser"
 # Application definition
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     "redemptions",
     "ai",
     "account",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -151,11 +153,71 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+AWS_ACCESS_KEY_ID = "AKIAWNHTHS2E54UO7GME"
+AWS_SECRET_ACCESS_KEY = "pkz6dxM4bQRTiWozF8HIXCjaabgPu2td97RlzM4R"
+AWS_STORAGE_BUCKET_NAME = "crossperks-files"
+AWS_S3_REGION_NAME = "us-east-1"  # Ensure this matches your actual AWS region
+
+AWS_S3_CUSTOM_DOMAIN = (
+    f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+)
+
+STATICFILES_STORAGE = "storages.backends.s3.S3Storage"
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+MEDIA_URL = "/media/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+
+# MEDIA_URL = f"{AWS_S3_CUSTOM_DOMAIN}/"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "access_key": "AKIAWNHTHS2E54UO7GME",
+            "secret_key": "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",
+            "bucket_name": "crossperks-files",
+            "region_name": "us-east-1",  # Optional, but recommended
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": "s3_upload_debug.log",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "botocore": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "boto3": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
 # Development Email Backend
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "no-reply@crossperks.com"

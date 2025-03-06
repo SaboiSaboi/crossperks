@@ -6,7 +6,7 @@ import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
   <header class="z-30 w-full sm:px-2 py-4">
     <div class="mx-auto max-w-7xl px-4 sm:px-0">
       <div
-        class="relative flex h-16 items-center justify-between gap-3 rounded-2xl px-8 border-2 border-[#EFBF04]"
+        class="relative flex h-16 items-center justify-between gap-3 rounded-2xl px-8 py-8 border-2 border-yellow-400 bg-gray-800"
       >
         <div class="flex flex-1 items-center">
           <router-link

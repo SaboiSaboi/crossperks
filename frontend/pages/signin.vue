@@ -26,8 +26,14 @@
         />
 
         <button
+          :disabled="!email || !password"
+          :class="[
+            !email || !password
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-500',
+            'w-full py-2 text-white rounded-lg transition mb-4',
+          ]"
           type="submit"
-          class="w-full py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-700 transition"
         >
           Sign In
         </button>

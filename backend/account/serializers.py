@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser
+from .models import BusinessProfile, CustomUser
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -18,3 +18,17 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             user_type=validated_data["user_type"],
         )
         return user
+
+
+class BusinessProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BusinessProfile
+        fields = [
+            "official_name",
+            "street_address",
+            "city",
+            "state",
+            "zip_code",
+            "is_claimed",
+            "claim_token",
+        ]

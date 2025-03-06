@@ -19,7 +19,7 @@
           </p>
           <!-- Typing Text -->
           <p
-            class="w-fit font-bold text-[#FFB347] text-3xl md:text-3xl lg:text-5xl h-[5rem] md:h-[7rem] lg:h-[7rem] pt-4"
+            class="w-fit font-bold text-yellow-400 text-3xl md:text-3xl lg:text-5xl h-[5rem] md:h-[7rem] lg:h-[7rem] pt-4"
           >
             {{ typedText }}
           </p>
@@ -35,7 +35,7 @@
         </p>
         <div class="flex justify-start items-center">
           <button
-            class="text-2xl px-8 py-4 bg-[#FFB347] text-[#333333] font-semibold rounded-full hover:bg-[#E1A300] transition"
+            class="text-2xl px-8 py-4 bg-yellow-400 text-[#333333] font-semibold rounded-full hover:bg-yellow-500 transition"
           >
             Join Now
           </button>
@@ -190,7 +190,7 @@
     >
       <h2 class="text-4xl font-bold mb-6">Ready to Unlock Your Perks?</h2>
       <button
-        class="mt-4 px-10 py-4 bg-[#FFB347] text-[#333333] rounded-full hover:bg-[#E1A300] transition"
+        class="mt-4 px-10 py-4 bg-yellow-400 text-[#333333] rounded-full hover:bg-yellow-500 transition"
       >
         Get Started
       </button>

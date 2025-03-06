@@ -9,3 +9,7 @@ mm:
 migrate:
 	@echo "migrating db"
 	./manage.py migrate
+
+run:
+	@echo "runserver"
+	./manage.py runserver

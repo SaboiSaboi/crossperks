@@ -5,10 +5,12 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import CustomUser
-from .serializers import UserRegistrationSerializer
+from .models import BusinessProfile, CustomUser
+from .serializers import BusinessProfileSerializer, UserRegistrationSerializer
 from knox.models import AuthToken
 from django.contrib.auth import authenticate
+
+from django.shortcuts import get_object_or_404
 
 
 class SendVerificationCodeView(APIView):
@@ -17,12 +19,11 @@ class SendVerificationCodeView(APIView):
     def post(self, request):
         print("minting code")
         email = request.data.get("email")
-        name = request.data.get("name")
         user_type = request.data.get("user_type")
 
-        if not email or not name:
+        if not email:
             return Response(
-                {"error": "Email and name are required"},
+                {"error": "Email is required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -31,7 +32,6 @@ class SendVerificationCodeView(APIView):
         user, created = CustomUser.objects.get_or_create(
             email=email,
             defaults={
-                "name": name,
                 "user_type": user_type,
                 "verification_code": verification_code,
             },
@@ -94,16 +94,196 @@ class CompleteRegistrationView(generics.CreateAPIView):
 
         try:
             user = CustomUser.objects.get(email=email, is_verified=True)
-            user.set_password(password)
-            user.save()
-            return Response(
-                {"message": "Registration complete!"}, status=status.HTTP_200_OK
-            )
+            if user.user_type == "customer":
+                cus_name = request.data.get("name")
+                user.name = cus_name
+                user.set_password(password)
+                user.save()
+                return Response(
+                    {"message": "Registration complete!"}, status=status.HTTP_200_OK
+                )
+            if user.user_type == "business":
+                businessName = request.data.get("officialName")
+                user.name = businessName
+                user.set_password(password)
+                claim_token = request.data.get("claim_token")
+                business = get_object_or_404(
+                    BusinessProfile, claim_token=claim_token, is_claimed=False
+                )
+                business.user = user
+                business.is_claimed = True
+                business.save()
+                user.save()
+
+                return Response(
+                    {"message": "Business claimed successfully! You can now log in."},
+                    status=status.HTTP_200_OK,
+                )
+
         except CustomUser.DoesNotExist:
             return Response(
                 {"error": "Email not verified or user not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+
+class PreloadBusinessView(APIView):
+    """Admin API to pre-load businesses into the system"""
+
+    def post(self, request):
+        data = request.data
+        business = BusinessProfile.objects.create(
+            official_name=data["official_name"],
+            street_address=data["street_address"],
+            city=data["city"],
+            state=data["state"],
+            zip_code=data["zip_code"],
+        )
+        return Response(
+            {
+                "message": "Business added successfully!",
+                "claim_token": business.claim_token,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class SendClaimEmailView(APIView):
+    """Sends a claim invitation email to a business owner"""
+
+    def post(self, request):
+        claim_token = request.data.get("claim_token")
+        business = get_object_or_404(
+            BusinessProfile, claim_token=claim_token, is_claimed=False
+        )
+        email = request.data.get("email")
+
+        claim_url = f"https://crossperks.com/claim-business/{business.claim_token}"
+        send_mail(
+            subject="Claim Your Business on CrossPerks",
+            message=f"Hi, claim your business {business.official_name} on CrossPerks by clicking here: {claim_url}",
+            from_email="noreply@crossperks.com",
+            recipient_list=[email],
+        )
+
+        return Response(
+            {"message": "Claim email sent successfully!"}, status=status.HTTP_200_OK
+        )
+
+
+class ClaimBusinessView(APIView):
+    """Allows a business owner to claim a business"""
+
+    def post(self, request):
+        claim_token = request.data.get("claim_token")
+        email = request.data.get("email")
+        password = request.data.get("password")
+
+        business = get_object_or_404(
+            BusinessProfile, claim_token=claim_token, is_claimed=False
+        )
+
+        # Create user
+        user = CustomUser.objects.create_user(
+            email=email,
+            name=business.official_name,
+            user_type="business",
+            password=password,
+        )
+        business.user = user
+        business.is_claimed = True
+        business.save()
+
+        return Response(
+            {"message": "Business claimed successfully! You can now log in."},
+            status=status.HTTP_200_OK,
+        )
+
+
+### **1️⃣ API: List All Unclaimed Businesses (Optional)**
+class BusinessListView(generics.ListAPIView):
+    """
+    Returns a list of unclaimed businesses.
+    Only needed if you want an admin view of all unclaimed businesses.
+    """
+
+    queryset = BusinessProfile.objects.filter(is_claimed=False)
+    serializer_class = BusinessProfileSerializer
+    permission_classes = [AllowAny]  # Change this if only admins should access it
+
+
+### **2️⃣ API: Fetch Business Details by Claim Token**
+class BusinessDetailView(APIView):
+    """
+    Fetches a specific business's details using the claim token.
+    """
+
+    permission_classes = [AllowAny]  # Anyone with a claim link should access this
+
+    def get(self, request, claim_token):
+
+        print("in func", request)
+        business = get_object_or_404(BusinessProfile, claim_token=claim_token)
+
+        if business.is_claimed == True:
+            no_data = {"is_claimed": True}
+            return Response(no_data)
+        else:
+            data = {
+                "official_name": business.official_name,
+                "street_address": business.street_address,
+                "city": business.city,
+                "state": business.state,
+                "zip_code": business.zip_code,
+                "is_claimed": business.is_claimed,
+            }
+
+            return Response(data)
+
+
+class ClaimBusinessView(APIView):
+    permission_classes = [AllowAny]
+    """Allows a business owner to claim a business, set details, and generate a QR code."""
+
+    def post(self, request):
+        claim_token = request.data.get("claim_token")
+        email = request.data.get("email")
+        password = request.data.get("password")
+        official_name = request.data.get("official_name")
+        street_address = request.data.get("street_address")
+        city = request.data.get("city")
+        state = request.data.get("state")
+        zip_code = request.data.get("zip_code")
+
+        business = get_object_or_404(
+            BusinessProfile, claim_token=claim_token, is_claimed=False
+        )
+
+        # Create business owner account
+        user = CustomUser.objects.create_user(
+            email=email, name=official_name, user_type="business", password=password
+        )
+
+        # Update business profile with details
+        business.user = user
+        business.official_name = official_name
+        business.street_address = street_address
+        business.city = city
+        business.state = state
+        business.zip_code = zip_code
+        business.is_claimed = True
+
+        # Generate QR Code
+        business.generate_qr_code()
+        business.save()
+
+        return Response(
+            {
+                "message": "Business successfully claimed!",
+                "qr_code_url": business.qr_code.url,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class LoginView(APIView):
