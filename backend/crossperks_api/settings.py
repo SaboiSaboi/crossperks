@@ -181,10 +181,10 @@ STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
-            "access_key": "AKIAWNHTHS2E54UO7GME",
-            "secret_key": "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",
-            "bucket_name": "crossperks-files",
-            "region_name": "us-east-1",  # Optional, but recommended
+            "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
+            "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
+            "bucket_name": os.getenv("AWS_STORAGE_BUCKET_NAME"),
+            "region_name": os.getenv("AWS_S3_REGION_NAME"),
         },
     },
     "staticfiles": {
