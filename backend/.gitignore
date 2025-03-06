@@ -1,1 +1,19 @@
+# Ignore environment files
 .env
+
+# Python-related
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.env/
+
+# Django-specific
+db.sqlite3
+/media/
+staticfiles/
+
+# Logs
+logs/
+*.log
