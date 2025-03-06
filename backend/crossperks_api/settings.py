@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from datetime import timedelta
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,10 +26,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-3*hl$yah0$6fi7c=2@e^)lnboz+=p6)^qn(**-zhp^u7#wtzll"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -153,10 +157,12 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-AWS_ACCESS_KEY_ID = "AKIAWNHTHS2E54UO7GME"
-AWS_SECRET_ACCESS_KEY = "pkz6dxM4bQRTiWozF8HIXCjaabgPu2td97RlzM4R"
-AWS_STORAGE_BUCKET_NAME = "crossperks-files"
-AWS_S3_REGION_NAME = "us-east-1"  # Ensure this matches your actual AWS region
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.getenv(
+    "AWS_S3_REGION_NAME"
+)  # Ensure this matches your actual AWS region
 
 AWS_S3_CUSTOM_DOMAIN = (
     f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
@@ -220,4 +226,4 @@ LOGGING = {
 }
 # Development Email Backend
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "no-reply@crossperks.com"
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
