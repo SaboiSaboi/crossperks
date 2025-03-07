@@ -1,39 +1,40 @@
-# Ignore environment files
+# 🔹 Ignore environment variables
 .env
 
-# Ignore Python virtual environments
+# 🔹 Ignore compiled Python files and cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 🔹 Ignore virtual environments
 env/
 venv/
 .venv/
 
-# Ignore compiled Python files
-__pycache__/
-*.py[cod]
-*.pyo
-
-# Ignore Django-specific files
-/media/  # Uploaded media files
-staticfiles/  # Collected static files
-
-# Ignore logs
+# 🔹 Ignore logs and temporary files
 logs/
 *.log
-s3_upload_debug.log
-gunicorn.log
+debug.log
 
-# Ignore PostgreSQL-related files
-pgdata/  # If using Docker for PostgreSQL
-*.pgsql  # Dump files from `pg_dump`
+# 🔹 Ignore Django-specific files
+/media/  # Ignore user-uploaded files (keep if needed)
+staticfiles/  # Ignore static files collected by `collectstatic`
+# db.sqlite3  # If using SQLite locally
 
-# Ignore IDE/editor files
+# 🔹 Ignore migrations cache but **keep actual migration files**
+**/migrations/__pycache__/
+
+# 🔹 Ignore IDE/editor files
 .vscode/
 .idea/
-*.swp  # Vim swap files
 
-# Ignore system-generated files
+# 🔹 Ignore OS-specific files
 .DS_Store
 Thumbs.db
 
-# Ignore Docker-related files (if using Docker)
+# 🔹 Ignore Docker-related files (if using Docker)
 docker-compose.override.yml
 *.dockerfile
+
+# 🔹 Keep Pipenv files (DO NOT IGNORE Pipfile or Pipfile.lock)
