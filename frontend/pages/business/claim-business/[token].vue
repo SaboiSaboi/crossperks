@@ -10,7 +10,7 @@ const claimed = ref(false);
 
 const email = ref("");
 const isValidEmail = computed(() => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail.value);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value);
 });
 const officialName = ref("");
 const verificationCode = ref("");
@@ -60,6 +60,7 @@ const sendVerificationCode = async () => {
 // Fetch business data
 const { data: business, error } = await useAsyncData("business", async () => {
   try {
+    // console.log("in the ");
     const businessData = await $fetch(
       `http://localhost:8000/account/business/${claimToken}/`
     );
@@ -67,6 +68,7 @@ const { data: business, error } = await useAsyncData("business", async () => {
       claimed.value = true;
       return null;
     }
+    // console.log("this is the bus", businessData);
     return businessData;
   } catch (err) {
     console.error("Error fetching business data:", err);
@@ -83,7 +85,7 @@ watchEffect(() => {
 });
 
 const completeRegistration = async () => {
-  console.log("in the complete reg");
+  // console.log("in the complete reg");
   if (userPassword.value !== confirmPassword.value) {
     alert("Passwords do not match.");
     return;
@@ -104,7 +106,16 @@ const completeRegistration = async () => {
         },
       }
     );
+
     console.log("Registration complete:", response);
+
+    const userType = response.user.user_type;
+
+    const token = useCookie("auth_token");
+    token.value = response.auth_token;
+
+    // Middleware handles onboarding redirect
+    navigateTo(`/${userType}`, { replace: true });
   } catch (error) {
     console.error("Failed to complete registration:", error);
   }

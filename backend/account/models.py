@@ -10,6 +10,7 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+import boto3
 
 
 class CustomUserManager(BaseUserManager):
@@ -58,6 +59,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)  # Required for superusers
 
     is_verified = models.BooleanField(default=False)
+    is_onboarded = models.BooleanField(default=False)
     verification_code = models.CharField(max_length=6, blank=True, null=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
@@ -70,6 +72,119 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return f"{self.name} ({self.user_type})"
 
 
+# class BusinessProfile(models.Model):
+#     user = models.OneToOneField(
+#         settings.AUTH_USER_MODEL,
+#         on_delete=models.SET_NULL,
+#         null=True,
+#         blank=True,
+#         related_name="business_profile",
+#     )
+
+#     # Business Details (Entered when business claims)
+#     official_name = models.CharField(max_length=255)
+#     street_address = models.CharField(max_length=255, blank=True, null=True)
+#     city = models.CharField(max_length=100, blank=True, null=True)
+#     state = models.CharField(max_length=100, blank=True, null=True)
+#     zip_code = models.CharField(max_length=20, blank=True, null=True)
+
+#     # Claiming System
+#     is_claimed = models.BooleanField(default=False)
+#     claim_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+
+#     # QR Code
+#     qr_code = models.ImageField(upload_to="", blank=True, null=True)
+
+#     created_at = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return self.official_name
+
+#     def generate_qr_code(self):
+#         logger = logging.getLogger(__name__)
+#         """Generates and saves a QR code for the business in S3"""
+
+#         try:
+#             qr = qrcode.make(f"https://crossperks.com/business/{self.id}")
+#             buffer = BytesIO()
+#             qr.save(buffer, format="PNG")
+
+#             filename = f"business_qr_codes/qr_{self.id}.png"
+
+#             logger.debug(f"🚀 Attempting to upload QR Code: {filename}")
+
+#             # Save QR Code to S3
+#             self.qr_code.save(filename, ContentFile(buffer.getvalue()), save=True)
+
+#             logger.info(f"QR Code uploaded to S3: {self.qr_code.url}")
+#             print(f"QR Code uploaded to S3: {self.qr_code.url}")
+
+#         except Exception as e:
+#             logger.error(f"Failed to upload QR Code: {str(e)}")
+#             print(f"Failed to upload QR Code: {str(e)}")
+
+
+# class BusinessProfile(models.Model):
+#     user = models.OneToOneField(
+#         settings.AUTH_USER_MODEL,
+#         on_delete=models.SET_NULL,
+#         null=True,
+#         blank=True,
+#         related_name="business_profile",
+#     )
+
+#     official_name = models.CharField(max_length=255)
+#     street_address = models.CharField(max_length=255, blank=True, null=True)
+#     city = models.CharField(max_length=100, blank=True, null=True)
+#     state = models.CharField(max_length=100, blank=True, null=True)
+#     zip_code = models.CharField(max_length=20, blank=True, null=True)
+
+#     is_claimed = models.BooleanField(default=False)
+#     website = models.CharField(max_length=255, blank=True, null=True)
+#     phone = models.CharField(max_length=255, blank=True, null=True)
+
+#     claim_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+#     # Change to URLField
+#     qr_code_url = models.URLField(blank=True, null=True)
+
+#     created_at = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return self.official_name
+
+#     def generate_qr_code(self):
+#         logger = logging.getLogger(__name__)
+
+#         try:
+#             qr = qrcode.make(f"https://crossperks.com/business/{self.id}")
+#             buffer = BytesIO()
+#             qr.save(buffer, format="PNG")
+
+#             filename = f"business_qr_codes/qr_{self.id}.png"
+#             logger.debug(f"Attempting to upload QR Code: {filename}")
+
+#             # Manually upload to S3 using boto3
+
+#             s3 = boto3.client("s3")
+
+#             s3.put_object(
+#                 Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+#                 Key=filename,
+#                 Body=buffer.getvalue(),
+#                 ContentType="image/png",
+#             )
+
+#             qr_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{filename}"
+
+#             # Save URL to model
+#             self.qr_code_url = qr_url
+#             self.save()
+
+#             logger.info(f"QR Code uploaded to S3: {self.qr_code_url}")
+
+
+#         except Exception as e:
+#             logger.error(f"Failed to upload QR Code: {str(e)}")
 class BusinessProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -79,19 +194,20 @@ class BusinessProfile(models.Model):
         related_name="business_profile",
     )
 
-    # Business Details (Entered when business claims)
     official_name = models.CharField(max_length=255)
     street_address = models.CharField(max_length=255, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
     state = models.CharField(max_length=100, blank=True, null=True)
     zip_code = models.CharField(max_length=20, blank=True, null=True)
 
-    # Claiming System
+    category = models.CharField(max_length=100, blank=True, null=True)  # Added
+    website = models.URLField(blank=True, null=True)  # URLField better than CharField
+    phone = models.CharField(max_length=20, blank=True, null=True)
+
     is_claimed = models.BooleanField(default=False)
     claim_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
 
-    # QR Code
-    qr_code = models.ImageField(upload_to="", blank=True, null=True)
+    qr_code_url = models.URLField(blank=True, null=True)  # Correctly using URLField
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -100,7 +216,6 @@ class BusinessProfile(models.Model):
 
     def generate_qr_code(self):
         logger = logging.getLogger(__name__)
-        """Generates and saves a QR code for the business in S3"""
 
         try:
             qr = qrcode.make(f"https://crossperks.com/business/{self.id}")
@@ -108,15 +223,60 @@ class BusinessProfile(models.Model):
             qr.save(buffer, format="PNG")
 
             filename = f"business_qr_codes/qr_{self.id}.png"
+            logger.debug(f"Attempting to upload QR Code: {filename}")
 
-            logger.debug(f"🚀 Attempting to upload QR Code: {filename}")
+            s3 = boto3.client("s3")
 
-            # Save QR Code to S3
-            self.qr_code.save(filename, ContentFile(buffer.getvalue()), save=True)
+            s3.put_object(
+                Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                Key=filename,
+                Body=buffer.getvalue(),
+                ContentType="image/png",
+            )
 
-            logger.info(f"✅ QR Code uploaded to S3: {self.qr_code.url}")
-            print(f"✅ QR Code uploaded to S3: {self.qr_code.url}")
+            qr_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{filename}"
+
+            self.qr_code_url = qr_url
+            self.save()
+
+            logger.info(f"QR Code uploaded to S3: {self.qr_code_url}")
 
         except Exception as e:
-            logger.error(f"❌ Failed to upload QR Code: {str(e)}")
-            print(f"❌ Failed to upload QR Code: {str(e)}")
+            logger.error(f"Failed to upload QR Code: {str(e)}")
+
+
+class CustomerProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="customer_profile",
+    )
+    current_perk = models.ForeignKey(
+        "Perk",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="current_perk",
+    )
+    previous_perks = models.ManyToManyField(
+        "Perk", related_name="previous_perks", blank=True
+    )
+
+    def __str__(self):
+        return f"Profile for {self.user.name}"
+
+
+class Perk(models.Model):
+    business = models.ForeignKey(
+        "BusinessProfile", on_delete=models.CASCADE, related_name="perks"
+    )
+    title = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+    total = models.IntegerField(default=0)
+    remaining = models.IntegerField(default=0)
+    redemptions = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.description} (From {self.business.official_name})"

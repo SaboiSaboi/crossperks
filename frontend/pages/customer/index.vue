@@ -65,9 +65,15 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
-const userName = ref("Sally"); // Placeholder, should be fetched dynamically
+const { handleCheckAuth } = useAuthS();
+
+const userName = ref(""); // Placeholder, should be fetched dynamically
 const currentPerk = ref(null);
 const recentPerks = ref([]);
+
+const userData = await handleCheckAuth();
+console.log(userData.user.name);
+userName.value = userData.user.name || "User"; // Fetch user's name dynamically
 
 const fetchPerks = async () => {
   try {
@@ -77,7 +83,7 @@ const fetchPerks = async () => {
         Authorization: `Token ${getToken()}`,
       },
     });
-    userName.value = response.user_name || "User"; // Fetch user's name dynamically
+
     currentPerk.value = response.current_perk;
     recentPerks.value = response.recent_perks;
   } catch (error) {

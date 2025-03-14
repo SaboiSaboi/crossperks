@@ -3,7 +3,6 @@ from django.contrib import admin
 from account.models import BusinessProfile, CustomUser
 
 
-# Register your models here.
 @admin.register(BusinessProfile)
 class BusinessProfileAdmin(admin.ModelAdmin):
     list_display = ("official_name", "city", "state", "is_claimed", "created_at")

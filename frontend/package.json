@@ -17,13 +17,14 @@
     "@tanstack/vue-table": "^8.21.2",
     "@types/node": "^22.13.1",
     "@vee-validate/zod": "^4.15.0",
-    "@vueuse/core": "^12.5.0",
     "@vueuse/integrations": "^12.7.0",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^0.475.0",
     "nuxt": "^3.15.4",
+    "pinia": "^3.0.1",
+    "pinia-plugin-persistedstate": "^4.2.0",
     "postcss": "^8.5.2",
     "qrcode": "^1",
     "radix-vue": "^1.9.13",
@@ -39,6 +40,8 @@
   "packageManager": "pnpm@9.12.2+sha512.22721b3a11f81661ae1ec68ce1a7b879425a1ca5b991c975b074ac220b187ce56c708fe5db69f4c962c989452eee76c82877f4ee80f474cebd61ee13461b6228",
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.13.1",
+    "@vueuse/core": "^12.5.0",
+    "@vueuse/nuxt": "^13.0.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3"
   }

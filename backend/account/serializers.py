@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BusinessProfile, CustomUser
+from .models import BusinessProfile, CustomUser, Perk
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -21,6 +21,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class BusinessProfileSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(required=False, allow_blank=True)
+    website = serializers.URLField(required=False, allow_blank=True)
+    phone = serializers.CharField(required=False, allow_blank=True)
+
     class Meta:
         model = BusinessProfile
         fields = [
@@ -29,6 +33,28 @@ class BusinessProfileSerializer(serializers.ModelSerializer):
             "city",
             "state",
             "zip_code",
-            "is_claimed",
-            "claim_token",
+            "category",
+            "website",
+            "phone",
         ]
+
+        read_only_fields = ["is_claimed", "claim_token", "qr_code"]
+
+
+class PerkSerializer(serializers.ModelSerializer):
+    """Serializer for Perk model"""
+
+    class Meta:
+        model = Perk
+        fields = [
+            "id",
+            "business",
+            "title",
+            "description",
+            "total",
+            "remaining",
+            "redemptions",
+            "is_active",
+            "created_at",
+        ]
+        read_only_fields = ["id", "business", "created_at"]

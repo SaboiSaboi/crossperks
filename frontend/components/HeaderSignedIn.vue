@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+const { logout } = useAuthS();
 </script>
 
 <template>
-  <header class="z-30 w-full sm:px-2 py-4 bg-gray-100">
+  <header class="z-30 w-full sm:px-2 py-4 bg-gray-50">
     <div class="mx-auto max-w-7xl px-4 sm:px-0">
       <div
         class="relative flex h-16 bg-slate-700 items-center justify-between gap-3 rounded-full px-8"
@@ -23,8 +23,21 @@ import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
           <NavigationMenu>
             <NavigationMenuList class="flex gap-7">
               <NavigationMenuItem class="text-slate-200 hover:text-slate-50">
+                <NavigationMenuLink href="/business/profile">
+                  <p class="hover:underline text-xl">Profile</p>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem class="text-slate-200 hover:text-slate-50">
                 <NavigationMenuLink href="/business">
-                  <p class="hover:underline text-2xl">Settings</p>
+                  <p class="hover:underline text-xl">Settings</p>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem
+                class="text-slate-200 hover:text-slate-50"
+                @click="logout"
+              >
+                <NavigationMenuLink href="/business">
+                  <p class="hover:underline text-lg">Sign Out</p>
                 </NavigationMenuLink>
               </NavigationMenuItem>
               <!-- <NavigationMenuItem class="text-black transition-colors">

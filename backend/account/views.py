@@ -5,10 +5,16 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import BusinessProfile, CustomUser
-from .serializers import BusinessProfileSerializer, UserRegistrationSerializer
+from .models import BusinessProfile, CustomUser, CustomerProfile, Perk
+from .serializers import (
+    BusinessProfileSerializer,
+    PerkSerializer,
+    UserRegistrationSerializer,
+)
 from knox.models import AuthToken
 from django.contrib.auth import authenticate
+from knox.auth import TokenAuthentication
+from rest_framework.generics import CreateAPIView
 
 from django.shortcuts import get_object_or_404
 
@@ -17,7 +23,6 @@ class SendVerificationCodeView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        print("minting code")
         email = request.data.get("email")
         user_type = request.data.get("user_type")
 
@@ -83,10 +88,97 @@ class VerifyCodeView(APIView):
             )
 
 
+# class CompleteRegistrationView(generics.CreateAPIView):
+#     """Completes registration after email verification"""
+
+#     permission_classes = [AllowAny]
+
+#     def post(self, request, *args, **kwargs):
+#         email = request.data.get("email")
+#         password = request.data.get("password")
+
+#         try:
+#             user = CustomUser.objects.get(email=email, is_verified=True)
+
+#             if user.user_type == "customer":
+#                 cus_name = request.data.get("name")
+#                 if not cus_name:
+#                     return Response(
+#                         {"error": "Name is required for customers."},
+#                         status=status.HTTP_400_BAD_REQUEST,
+#                     )
+
+#                 user.name = cus_name
+#                 user.set_password(password)
+#                 user.save()
+
+#                 CustomerProfile.objects.get_or_create(user=user)
+
+#                 return Response(
+#                     {"message": "Registration complete!"}, status=status.HTTP_200_OK
+#                 )
+
+#             print("putting together business")
+
+#             if user.user_type == "business":
+#                 business_name = request.data.get("officialName")
+#                 claim_token = request.data.get("claim_token")
+
+#                 if not business_name or not claim_token:
+#                     return Response(
+#                         {"error": "Business name and claim token are required."},
+#                         status=status.HTTP_400_BAD_REQUEST,
+#                     )
+
+#                 business = get_object_or_404(
+#                     BusinessProfile, claim_token=claim_token, is_claimed=False
+#                 )
+
+#                 user.name = business_name
+#                 user.set_password(password)
+#                 user.save()
+
+#                 business.user = user
+#                 business.is_claimed = True
+#                 business.official_name = business_name
+#                 print("we are about to make code")
+#                 business.generate_qr_code()
+#                 print("we are done making code")
+
+#                 business.save()
+#                 # now gonna sign them in
+#                 print("user logging in is", user)
+#                 if user is None:
+#                     return Response({"error": "Invalid email or password."}, status=400)
+
+#                 _, token = AuthToken.objects.create(user)
+
+#                 response_data = {
+#                     "message": "Login successful",
+#                     "user": {
+#                         "id": user.id,
+#                         "email": user.email,
+#                         "name": user.name,
+#                         "user_type": user.user_type,
+#                     },
+#                     "auth_token": token,
+#                 }
+
+#                 return Response(
+#                     response_data,
+#                     status=status.HTTP_200_OK,
+#                 )
+
+#         except CustomUser.DoesNotExist:
+#             return Response(
+#                 {"error": "Email not verified or user not found."},
+#                 status=status.HTTP_404_NOT_FOUND,
+#             )
+from knox.models import AuthToken
+
+
 class CompleteRegistrationView(generics.CreateAPIView):
     permission_classes = [AllowAny]
-
-    serializer_class = UserRegistrationSerializer
 
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
@@ -94,31 +186,66 @@ class CompleteRegistrationView(generics.CreateAPIView):
 
         try:
             user = CustomUser.objects.get(email=email, is_verified=True)
+
             if user.user_type == "customer":
                 cus_name = request.data.get("name")
+                if not cus_name:
+                    return Response(
+                        {"error": "Name is required for customers."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
                 user.name = cus_name
                 user.set_password(password)
                 user.save()
-                return Response(
-                    {"message": "Registration complete!"}, status=status.HTTP_200_OK
-                )
-            if user.user_type == "business":
-                businessName = request.data.get("officialName")
-                user.name = businessName
-                user.set_password(password)
+
+                CustomerProfile.objects.get_or_create(user=user)
+
+            elif user.user_type == "business":
+                business_name = request.data.get("officialName")
                 claim_token = request.data.get("claim_token")
+
+                if not business_name or not claim_token:
+                    return Response(
+                        {"error": "Business name and claim token are required."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
                 business = get_object_or_404(
                     BusinessProfile, claim_token=claim_token, is_claimed=False
                 )
-                business.user = user
-                business.is_claimed = True
-                business.save()
+
+                user.name = business_name
+                user.set_password(password)
                 user.save()
 
+                business.user = user
+                business.is_claimed = True
+                business.official_name = business_name
+                business.generate_qr_code()
+                business.save()
+
+            else:
                 return Response(
-                    {"message": "Business claimed successfully! You can now log in."},
-                    status=status.HTTP_200_OK,
+                    {"error": "Invalid user type."},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
+
+            # Generate login token (for both customer and business)
+            _, token = AuthToken.objects.create(user)
+
+            response_data = {
+                "message": "Registration and login successful",
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "name": user.name,
+                    "user_type": user.user_type,
+                },
+                "auth_token": token,
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
 
         except CustomUser.DoesNotExist:
             return Response(
@@ -171,33 +298,33 @@ class SendClaimEmailView(APIView):
         )
 
 
-class ClaimBusinessView(APIView):
-    """Allows a business owner to claim a business"""
+# class ClaimBusinessView(APIView):
+#     """Allows a business owner to claim a business"""
 
-    def post(self, request):
-        claim_token = request.data.get("claim_token")
-        email = request.data.get("email")
-        password = request.data.get("password")
+#     def post(self, request):
+#         claim_token = request.data.get("claim_token")
+#         email = request.data.get("email")
+#         password = request.data.get("password")
 
-        business = get_object_or_404(
-            BusinessProfile, claim_token=claim_token, is_claimed=False
-        )
+#         business = get_object_or_404(
+#             BusinessProfile, claim_token=claim_token, is_claimed=False
+#         )
 
-        # Create user
-        user = CustomUser.objects.create_user(
-            email=email,
-            name=business.official_name,
-            user_type="business",
-            password=password,
-        )
-        business.user = user
-        business.is_claimed = True
-        business.save()
+#         # Create user
+#         user = CustomUser.objects.create_user(
+#             email=email,
+#             name=business.official_name,
+#             user_type="business",
+#             password=password,
+#         )
+#         business.user = user
+#         business.is_claimed = True
+#         business.save()
 
-        return Response(
-            {"message": "Business claimed successfully! You can now log in."},
-            status=status.HTTP_200_OK,
-        )
+#         return Response(
+#             {"message": "Business claimed successfully! You can now log in."},
+#             status=status.HTTP_200_OK,
+#         )
 
 
 ### **1️⃣ API: List All Unclaimed Businesses (Optional)**
@@ -222,7 +349,6 @@ class BusinessDetailView(APIView):
 
     def get(self, request, claim_token):
 
-        print("in func", request)
         business = get_object_or_404(BusinessProfile, claim_token=claim_token)
 
         if business.is_claimed == True:
@@ -298,6 +424,8 @@ class LoginView(APIView):
             return Response({"error": "Email and password are required."}, status=400)
 
         user = authenticate(request, username=email, password=password)
+        # print("user logging in is", user)
+        # print("request used is ", request)
         if user is None:
             return Response({"error": "Invalid email or password."}, status=400)
 
@@ -310,6 +438,7 @@ class LoginView(APIView):
                 "email": user.email,
                 "name": user.name,
                 "user_type": user.user_type,
+                "onboarded": user.is_onboarded,
             },
             "auth_token": token,
         }
@@ -317,14 +446,9 @@ class LoginView(APIView):
         return Response(response_data, status=status.HTTP_200_OK)
 
 
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
-from knox.auth import TokenAuthentication
-
-
 class GetUserAPIView(APIView):
+    """Fetches the logged-in user's details along with profile info."""
+
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -337,29 +461,114 @@ class GetUserAPIView(APIView):
         )
 
         user = request.user
-
         role = user.user_type if hasattr(user, "user_type") else "Unknown"
-        company = getattr(user, "company", None)
 
         response_data = {
-            "message": "User data retrieved successfully",
             "user": {
                 "id": user.id,
                 "name": user.name,
                 "email": user.email,
                 "user_type": role,
+                "is_onboarded": user.is_onboarded,
             },
             "auth_token": token,
         }
 
-        if company:
-            response_data["company"] = {
-                "id": company.id,
-                "name": company.name,
-                "admin_id": getattr(company.admin, "id", None),
-                "created_at": company.created_at,
-            }
-        else:
-            response_data["company"] = None
+        # Fetch Business or Customer Profile
+        if role == "business":
+            business = getattr(user, "business_profile", None)
+            if business:
+                response_data["business_profile"] = {
+                    "official_name": business.official_name,
+                    "street_address": business.street_address,
+                    "city": business.city,
+                    "state": business.state,
+                    "zip_code": business.zip_code,
+                    "is_claimed": business.is_claimed,
+                    "created_at": business.created_at,
+                    "qr_code": business.qr_code_url,
+                }
+        elif role == "customer":
+            customer = getattr(user, "customer_profile", None)
+            if customer:
+                response_data["customer_profile"] = {
+                    "current_perk": (
+                        PerkSerializer(customer.current_perk).data
+                        if customer.current_perk
+                        else None
+                    ),
+                    "previous_perks": PerkSerializer(
+                        customer.previous_perks.all(), many=True
+                    ).data,
+                }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+class CreatePerkView(CreateAPIView):
+    """Allows a business to create a perk."""
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = PerkSerializer
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.user_type != "business":
+            return Response(
+                {"error": "Only businesses can create perks."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # print("Hey there, you finna create a perk")
+
+        business = user.business_profile
+        serializer.save(business=business)
+
+
+class BusinessOnboardingView(generics.UpdateAPIView):
+    serializer_class = BusinessProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return get_object_or_404(BusinessProfile, user=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        business_profile = self.get_object()
+        serializer = self.serializer_class(
+            business_profile, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        # Mark user as onboarded
+        user = request.user
+        user.is_onboarded = True
+        user.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserPerkView(generics.RetrieveAPIView):
+    serializer_class = PerkSerializer
+    permission_classes = [IsAuthenticated]
+
+    print("in the perk")
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        # print("finna get perk")
+        perk = get_object_or_404(
+            Perk, business__user=user, is_active=True
+        )  # Fetch only active perk
+        print("the user is ", perk)
+        serializer = self.get_serializer(perk)
+        return Response({"perk": serializer.data})
+
+
+class UserPerksView(generics.ListAPIView):
+    serializer_class = PerkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Perk.objects.filter(business__user=user, is_active=False)

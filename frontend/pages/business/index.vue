@@ -6,7 +6,6 @@ interface Campaign {
   remaining: number;
   total: number;
   redemptions: number;
-  qrCode: string;
 }
 
 interface Insights {
@@ -16,46 +15,24 @@ interface Insights {
   conversionRate: number;
 }
 
-// Reactive state
-const campaign = ref<Campaign | null>({
-  id: 1,
-  name: "$1 Off Any Coffee Drink",
-  remaining: 12,
-  total: 30,
-  redemptions: 18,
-  qrCode: "https://your-qr-code-link.com",
-});
+const campaign = ref<Campaign | null>(null);
 
 const insights = ref<Insights>({
-  newCustomers: 24,
-  returningCustomers: 8,
-  scans: 52,
-  conversionRate: 35,
+  newCustomers: 0,
+  returningCustomers: 0,
+  scans: 0,
+  conversionRate: 0,
 });
 
-const pastCampaigns = ref<Campaign[]>([
-  {
-    id: 2,
-    name: "$5 Off Haircuts",
-    remaining: 0,
-    total: 40,
-    redemptions: 30,
-    qrCode: "",
-  },
-  {
-    id: 3,
-    name: "Free Dessert with Meal",
-    remaining: 0,
-    total: 25,
-    redemptions: 15,
-    qrCode: "",
-  },
-]);
+const pastCampaigns = ref<Campaign[] | null>(null);
+const perkStore = usePerkStore();
 
 // Computed properties
 const campaignProgress = computed(() => {
-  if (!campaign.value) return 0;
-  return ((campaign.value.redemptions / campaign.value.total) * 100).toFixed(0);
+  if (perkStore.perk && perkStore.perk.total) {
+    return (perkStore.perk.remaining / perkStore.perk.total) * 100;
+  }
+  return 0; // or any default value you'd prefer
 });
 
 // Event Handlers
@@ -72,91 +49,72 @@ const endCampaign = () => {
   // alert("Campaign ended. Create a new one when you're ready.");
 };
 
-const createCampaign = () => {
-  campaign.value = {
-    id: 4,
-    name: "10% Off Your Next Meal",
-    remaining: 20,
-    total: 50,
-    redemptions: 0,
-    qrCode: "https://your-new-qr-code.com",
-  };
-  alert("New campaign created!");
-};
+const { handleCheckAuth } = useAuthS();
+
+const business_user: any = await handleCheckAuth();
+const business = business_user.business_profile;
 
 onMounted(() => {
-  console.log("Business dashboard loaded.");
+  perkStore.loadPerk();
 });
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50 text-gray-900">
-    <!-- Header -->
-
+    <HeaderSignedIn />
     <div
-      class="bg-white shadow-md p-6 md:p-10 flex flex-col md:flex-row justify-between items-center"
+      class="shadow-md p-6 md:p-10 flex flex-col md:flex-row justify-center items-center"
     >
-      <div>
+      <div class="flex flex-col justify-center items-center">
         <h1 class="text-4xl font-extrabold text-gray-800">
-          Business Dashboard
+          {{ business.official_name }} Dashboard
         </h1>
         <p class="text-lg text-gray-600 mt-2">
           Manage your CrossPerks campaigns and track results.
         </p>
       </div>
-      <button
-        v-if="campaign"
-        @click="endCampaign"
-        class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
-      >
-        End Current Campaign
-      </button>
     </div>
-
-    <!-- Main Content -->
-    <div class="max-w-6xl mx-auto p-6 md:p-10">
-      <div v-if="campaign" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Active Campaign Card -->
+    <div
+      class="max-w-6xl mx-auto p-6 md:p-10 h-screen flex flex-col justify-center"
+    >
+      <div
+        v-if="perkStore.isLoading"
+        class="flex justify-center py-5 h-[20rem]"
+      >
+        <p class="text-gray-500">Loading</p>
+      </div>
+      <div
+        v-else-if="perkStore.perk"
+        class="grid grid-cols-1 md:grid-cols-3 gap-6 h-[19rem]"
+      >
         <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
           <h2 class="text-xl font-semibold text-indigo-700">Active Campaign</h2>
           <p class="mt-2 text-lg font-bold text-gray-800">
-            {{ campaign.name }}
+            {{ perkStore.perk?.title }}
           </p>
+
+          <p class="mb-2 text-base text-gray-800">
+            {{ perkStore.perk?.description }}
+          </p>
+          <hr class="my-2" />
           <p class="text-gray-600">
             Perks Remaining:
             <span class="font-semibold"
-              >{{ campaign.remaining }} / {{ campaign.total }}</span
+              >{{ perkStore.perk?.remaining }} /
+              {{ perkStore.perk?.total }}</span
             >
           </p>
           <p class="text-gray-600">
             Redemptions:
-            <span class="font-semibold">{{ campaign.redemptions }}</span>
+            <span class="font-semibold">{{ perkStore.perk?.redemptions }}</span>
           </p>
 
-          <!-- Progress Bar -->
-          <div class="mt-4 w-full bg-gray-200 rounded-full h-3">
-            <div
-              class="bg-indigo-600 h-3 rounded-full transition-all duration-500"
-              :style="{ width: campaignProgress + '%' }"
-            ></div>
-          </div>
+          <Progress class="mt-4" :model-value="campaignProgress" />
           <p class="mt-1 text-sm text-gray-500">
             Redemptions: {{ campaignProgress }}%
           </p>
-
-          <!-- QR Code Section -->
-          <div class="mt-4 flex flex-col items-center">
-            <NuxtImg :src="campaign.qrCode" alt="QR Code" class="w-40 h-40" />
-            <button
-              @click="downloadQR"
-              class="mt-3 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-            >
-              Download QR Code
-            </button>
-          </div>
         </div>
 
-        <!-- Performance Insights -->
         <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
           <h2 class="text-xl font-semibold text-indigo-700">
             Performance Insights
@@ -185,9 +143,8 @@ onMounted(() => {
           </p>
         </div>
 
-        <!-- Actions -->
         <div
-          class="bg-white p-6 rounded-lg shadow-lg border border-gray-200 flex flex-col items-center"
+          class="bg-white p-6 rounded-lg shadow-lg border border-gray-200 items-center"
         >
           <h2 class="text-xl font-semibold text-indigo-700">Manage Campaign</h2>
           <button
@@ -196,27 +153,27 @@ onMounted(() => {
           >
             Generate One-Time Code
           </button>
-          <button
-            @click="endCampaign"
-            class="mt-2 px-5 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-          >
-            End Campaign
-          </button>
+          <!-- <div class="relative text-xs text-gray-500">
+            <button @click="endCampaign">End Campaign</button>
+          </div> -->
         </div>
       </div>
 
-      <!-- No Active Campaign -->
-      <div v-else class="flex flex-col items-center justify-center py-20">
-        <h2 class="text-2xl font-bold text-gray-800">No Active Campaign</h2>
-        <p class="text-gray-600 mt-2 text-lg">
-          Create a new campaign to start sending and receiving referrals.
-        </p>
-        <CampaignModal />
-      </div>
-
+      <span v-else>
+        <div class="flex flex-col items-center justify-center py-20">
+          <h2 class="text-2xl font-bold text-gray-800">No Active Campaign</h2>
+          <p class="text-gray-600 mt-2 text-lg">
+            Create a new campaign to start sending and receiving referrals.
+          </p>
+          <CampaignModal />
+        </div>
+      </span>
       <div class="mt-10">
         <h2 class="text-2xl font-extrabold text-gray-800">Past Campaigns</h2>
-        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div
+          v-if="pastCampaigns"
+          class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
           <div
             v-for="past in pastCampaigns"
             :key="past.id"
@@ -231,6 +188,9 @@ onMounted(() => {
               Total Scans: <span class="font-semibold">{{ past.total }}</span>
             </p>
           </div>
+        </div>
+        <div v-else class="mt-24 text-lg flex justify-center items-center">
+          No past campaigns yet
         </div>
       </div>
     </div>

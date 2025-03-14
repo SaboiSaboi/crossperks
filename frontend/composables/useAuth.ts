@@ -141,21 +141,41 @@ export const useAuthS = () => {
   });
 
   function login(loginArgs: z.infer<typeof UserLoginSchema>) {
-    console.log("in the login:");
     loginMutate(loginArgs, {
       onError(e) {
         console.log("this is the error", e);
       },
       onSuccess(data) {
         setToken(data.auth_token);
-        navigateTo(
-          {
-            path: "/customer",
-          },
-          {
-            replace: true,
+
+        if (data.user.user_type === "business") {
+          if (!data.user.onboarded) {
+            navigateTo(
+              {
+                path: "/business/onboarding",
+              },
+              {
+                replace: true,
+              }
+            );
+          } else {
+            navigateTo(
+              {
+                path: "/business",
+              },
+              { replace: true }
+            );
           }
-        );
+        } else {
+          navigateTo(
+            {
+              path: "/customer",
+            },
+            {
+              replace: true,
+            }
+          );
+        }
       },
     });
   }
@@ -261,7 +281,7 @@ export const useAuthS = () => {
           headers: { Authorization: `Token ${token}` },
         });
 
-        return UserSchema.parse(userIs);
+        return userIs; //UserSchema.parse(userIs);
       } catch (error) {
         console.error("Error fetching user foo:", error);
         return null;

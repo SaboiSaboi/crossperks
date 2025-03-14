@@ -6,7 +6,7 @@
           <Button
             class="mt-6 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:text-white transition"
           >
-            Create New Campaign here
+            Create New Campaign
           </Button>
         </DialogTrigger>
         <DialogContent class="sm:max-w-[425px]">
@@ -20,7 +20,26 @@
           </DialogHeader>
 
           <form id="dialogForm" @submit.prevent="handleSubmit(onSubmit)">
-            <!-- Perk Description Field -->
+            <FormField
+              v-slot="{ componentField, errorMessage }"
+              name="perkTitle"
+            >
+              <FormItem class="mt-4">
+                <FormLabel class="block text-base font-medium text-gray-700">
+                  Perk Title
+                </FormLabel>
+                <FormControl class="">
+                  <Input
+                    v-bind="componentField"
+                    class="my-2 p-3 border rounded-lg w-full"
+                    placeholder="e.g., Free Cookie."
+                  />
+                </FormControl>
+                <FormMessage class="h-2" v-if="errorMessage" />
+                <div v-else class="text-xs h-2"></div>
+              </FormItem>
+            </FormField>
+
             <FormField
               v-slot="{ componentField, errorMessage }"
               name="perkDescription"
@@ -41,7 +60,6 @@
               </FormItem>
             </FormField>
 
-            <!-- Total Perks Available Field -->
             <FormField
               v-slot="{ componentField, errorMessage }"
               name="totalPerks"
@@ -84,12 +102,22 @@
 <script setup lang="ts">
 import { toast } from "@/components/ui/toast";
 import { toTypedSchema } from "@vee-validate/zod";
+import { Inbox } from "lucide-vue-next";
 import * as z from "zod";
+import Input from "./ui/input/Input.vue";
 
 const isOpen = ref(false);
 
 const formSchema = toTypedSchema(
   z.object({
+    perkTitle: z
+      .string()
+      .min(5, {
+        message: "Perk title need to be at least 3 characters.",
+      })
+      .max(100, {
+        message: "Perk title needs to be fewer than 50 characters",
+      }),
     perkDescription: z
       .string()
       .min(5, {
@@ -104,44 +132,53 @@ const formSchema = toTypedSchema(
   })
 );
 
-interface Campaign {
-  id: number;
-  name: string;
-  remaining: number;
-  total: number;
-  redemptions: number;
-  qrCode: string;
-}
+const getToken = () => {
+  const match = document.cookie.match(new RegExp("(^| )auth_token=([^;]+)"));
+  return match ? match[2] : null;
+};
 
-interface NewCampaignInterface {
-  businessName: string;
-  perkDescription: string;
-  totalPerks: number;
-}
+async function onSubmit(values: any) {
+  try {
+    const response: any = await $fetch(
+      "http://localhost:8000/account/create-perk/",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Token ${getToken()}`,
+        },
+        body: {
+          title: values.perkTitle,
+          description: values.perkDescription,
+          total: values.totalPerks,
+        },
+      }
+    );
 
-const newCampaignData = ref<NewCampaignInterface | null>(null);
+    const store = usePerkStore();
 
-const businessName = "Some Business Name";
-const businessCampaign = `https://www.crossperks.com/${businessName}?address:"123-main-st-portland-or, "`;
-
-function onSubmit(values: any) {
-  console.log(typeof values);
-
-  newCampaignData.value = {
-    businessName: businessName,
-    perkDescription: values.perkDescription,
-    totalPerks: values.totalPerks,
-  };
-
-  // send data to backend, save it in table, return data describing the current perk
-
-  isOpen.value = false;
-  setTimeout(() => {
-    toast({
-      title: "Congratulations 🎉",
-      description:
-        "Your perk campaign has been successfully create! Please print your campaign's QR code provided and place it visibly near your point of sales counter.",
+    store.setPerk({
+      title: response.title,
+      description: response.description,
+      total: response.total,
+      remaining: response.remaining,
+      isActive: response.is_active,
+      redemptions: response.redemptions,
     });
-  }, 300);
+
+    isOpen.value = false;
+
+    setTimeout(() => {
+      toast({
+        title: "Congratulations 🎉",
+        description: `Your perk campaign has been successfully created! Please print your QR code.`,
+      });
+    }, 300);
+  } catch (error) {
+    console.error("Failed to create campaign:", error);
+    toast({
+      title: "Error",
+      description: "Failed to create the campaign. Please try again.",
+    });
+  }
 }
 </script>

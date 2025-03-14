@@ -1,34 +1,5 @@
 import z from "zod";
 
-export const CustomDocumentSchema = z
-  .object({
-    id: z.number(),
-    title: z.string(),
-    description: z.string(),
-    created_by: z.number(),
-    company: z.number(),
-    created_at: z.string(),
-    updated_at: z.string(),
-    // content: z.string().optional(),
-    // content: z.array(
-    //   z.object({
-    //     order: z.number(),
-    //     value: z.string(),
-    //     kb: z.string(),
-    //   })
-    // ),
-  })
-  .transform((x) => ({
-    ...x,
-    user_id: `${x.created_by}`,
-    company_id: `${x.company}`,
-  }));
-
-export const CustomDocumentSchemas = z.object({
-  customDocuments: z.array(CustomDocumentSchema),
-});
-export type CustomDocument = z.infer<typeof CustomDocumentSchema>;
-
 export const UserRoleSchema = z.enum(["admin", "staff"]);
 
 export const UserSchema = z.object({
@@ -48,6 +19,7 @@ export const UserSchemaLogin = z.object({
     email: z.string().email(),
     name: z.string(),
     user_type: z.string(),
+    onboarded: z.boolean(),
   }),
   auth_token: z.string(),
 });
