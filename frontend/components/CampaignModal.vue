@@ -163,6 +163,8 @@ async function onSubmit(values: any) {
       remaining: response.remaining,
       isActive: response.is_active,
       redemptions: response.redemptions,
+      created_at: response.created_at,
+      id: response.id,
     });
 
     isOpen.value = false;

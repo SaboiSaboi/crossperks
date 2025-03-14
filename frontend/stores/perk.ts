@@ -7,36 +7,49 @@ interface Perk {
   remaining: number;
   isActive: boolean;
   redemptions: number;
+  created_at: string;
+  id: number;
 }
 
 export const usePerkStore = defineStore("perk", {
   state: () => ({
-    perk: import.meta.client
-      ? JSON.parse(localStorage.getItem("perk") || "null")
-      : (null as Perk | null),
+    perk: null as Perk | null, // ✅ Prevent SSR issues
     user: null as any,
-    isLoading: true,
+    isLoading: false,
     pastPerks: null as Perk[] | null,
   }),
 
   getters: {
     currentPerk: (state) => state.perk,
+    hasPastPerks: (state) => state.pastPerks && state.pastPerks.length > 0, // ✅ New getter
   },
 
   actions: {
-    async getStorageKey() {
+    async initializeStore() {
+      this.isLoading = true;
+      const { handleCheckAuth } = useAuthS();
+      this.user = await handleCheckAuth();
+
       if (!this.user) {
-        const { handleCheckAuth } = useAuthS();
-        this.user = await handleCheckAuth(); // Ensure user is set
+        this.isLoading = false;
+        return;
       }
 
-      return this.user.id ? `perk_${this.user.id}` : null;
+      await Promise.all([this.loadPerk(), this.loadPastPerksFromDB()]);
+      this.isLoading = false;
+    },
+
+    getStorageKey() {
+      return this.user?.id ? `perk_${this.user.id}` : null;
+    },
+
+    getStorageKeyPastPerks() {
+      return this.user?.id ? `pastPerks_${this.user.id}` : null;
     },
 
     async loadPerkFromDB() {
       try {
-        if (!this.user) await this.getStorageKey(); // Ensure user is fetched
-
+        if (!this.user) return null;
         const token = useCookie("auth_token");
 
         const response: any = await $fetch(
@@ -51,14 +64,16 @@ export const usePerkStore = defineStore("perk", {
 
         return response.perk || null;
       } catch (error) {
-        console.error(error);
+        console.error("Failed to load perk from DB:", error);
+        return null;
       }
     },
-    async loadPastPerksFromDB() {
-      const token = useCookie("auth_token");
-      this.isLoading = true;
 
+    async loadPastPerksFromDB() {
       try {
+        if (!this.user) return;
+        const token = useCookie("auth_token");
+
         const response: any = await $fetch(
           "http://localhost:8000/account/past-perks/",
           {
@@ -68,20 +83,19 @@ export const usePerkStore = defineStore("perk", {
             },
           }
         );
-        this.pastPerks = response.perks || [];
+
+        this.pastPerks = response || [];
+        this.setPastPerks(response);
       } catch (error) {
         console.error("Failed to fetch past perks:", error);
       }
-
-      this.isLoading = false;
     },
 
     async loadPerk() {
       if (import.meta.client) {
         this.isLoading = true;
 
-        const key = await this.getStorageKey();
-
+        const key = this.getStorageKey();
         if (!key) {
           this.isLoading = false;
           return;
@@ -96,16 +110,15 @@ export const usePerkStore = defineStore("perk", {
             this.setPerk(perkFromDB);
           }
         }
+
         this.isLoading = false;
       }
     },
 
     async setPerk(data: Perk) {
-      console.log("setPerk function is running with data:", data); // ✅ Check if it runs
-
-      const key = await this.getStorageKey();
+      const key = this.getStorageKey();
       if (!key) {
-        console.log("Storage key not found, exiting setPerk."); // ✅ Check if key exists
+        console.warn("Storage key not found, exiting setPerk.");
         return;
       }
 
@@ -114,26 +127,37 @@ export const usePerkStore = defineStore("perk", {
       });
 
       localStorage.setItem(key, JSON.stringify(data));
-      console.log("Perk has been set in store and localStorage:", this.perk); // ✅ Confirm it's set
+    },
+
+    async setPastPerks(data: Perk[]) {
+      const key = this.getStorageKeyPastPerks();
+      if (!key) {
+        console.warn("Storage key not found, exiting setPastPerks.");
+        return;
+      }
+
+      this.$patch((state) => {
+        state.pastPerks = data;
+      });
+
+      localStorage.setItem(key, JSON.stringify(data));
     },
 
     async clearPerk() {
-      const key = await this.getStorageKey();
-      if (key) {
-        localStorage.removeItem(key);
-      }
+      const perkKey = this.getStorageKey();
+      const pastPerksKey = this.getStorageKeyPastPerks();
+
+      if (perkKey) localStorage.removeItem(perkKey);
+      if (pastPerksKey) localStorage.removeItem(pastPerksKey);
+
       this.perk = null;
+      this.pastPerks = null;
     },
 
     async deletePerk() {
+      if (!this.user) return;
       await $fetch(`/api/perks/${this.user.id}`, { method: "DELETE" });
       this.clearPerk();
-    },
-
-    async initializeStore() {
-      const { handleCheckAuth } = useAuthS();
-      this.user = await handleCheckAuth();
-      await this.loadPerk();
     },
   },
 });
