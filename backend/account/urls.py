@@ -3,8 +3,10 @@ from .views import (
     BusinessDetailView,
     BusinessListView,
     BusinessOnboardingView,
+    BusinessProfileListView,
     ClaimBusinessView,
     CreatePerkView,
+    EndCampaignView,
     GetUserAPIView,
     LoginView,
     SendVerificationCodeView,
@@ -25,7 +27,7 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path("user/", GetUserAPIView.as_view(), name="get-user"),
     path("create-perk/", CreatePerkView.as_view(), name="create-perk"),
-    path("businesses/", BusinessListView.as_view(), name="business-list"),
+    # path("businesses/", BusinessListView.as_view(), name="business-list"),
     path(
         "business/<uuid:claim_token>/",
         BusinessDetailView.as_view(),
@@ -39,4 +41,8 @@ urlpatterns = [
     ),
     path("perk/", UserPerkView.as_view(), name="get-a-perk"),
     path("onboarding/", BusinessOnboardingView.as_view(), name="onboarding-user"),
+    path(
+        "perks/<int:campaign_id>/end/", EndCampaignView.as_view(), name="end_campaign"
+    ),
+    path("businesses/", BusinessProfileListView.as_view(), name="business-list"),
 ]

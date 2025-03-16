@@ -11,6 +11,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 import boto3
+from django.utils.timezone import now
 
 
 class CustomUserManager(BaseUserManager):
@@ -124,6 +125,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 #             print(f"Failed to upload QR Code: {str(e)}")
 
 
+class BusinessIdentifier(models.Model):
+    """Model for business identifiers (e.g., Women-Owned, LGBTQ+)."""
+
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 # class BusinessProfile(models.Model):
 #     user = models.OneToOneField(
 #         settings.AUTH_USER_MODEL,
@@ -200,15 +210,15 @@ class BusinessProfile(models.Model):
     state = models.CharField(max_length=100, blank=True, null=True)
     zip_code = models.CharField(max_length=20, blank=True, null=True)
 
-    category = models.CharField(max_length=100, blank=True, null=True)  # Added
-    website = models.URLField(blank=True, null=True)  # URLField better than CharField
+    category = models.CharField(max_length=100, blank=True, null=True)
+    website = models.URLField(blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
-
+    logo = models.URLField(null=True, blank=True)
+    identifiers = models.ManyToManyField(BusinessIdentifier, blank=True)
     is_claimed = models.BooleanField(default=False)
     claim_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
 
-    qr_code_url = models.URLField(blank=True, null=True)  # Correctly using URLField
-
+    qr_code_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -277,6 +287,13 @@ class Perk(models.Model):
     redemptions = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
+
+    def end_campaign(self):
+        """Marks the campaign as ended"""
+        self.is_active = False
+        self.ended_at = now()
+        self.save()
 
     def __str__(self):
         return f"{self.description} (From {self.business.official_name})"

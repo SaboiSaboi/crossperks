@@ -1,7 +1,7 @@
 <template>
   <div>
     <button
-      class="p-2 text-black z-50 md:hidden"
+      class="p-2 text-white z-50 md:hidden"
       aria-label="Open Menu"
       @click="toggleMobileNav"
     >
@@ -21,9 +21,9 @@
       </svg>
     </button>
 
-    <div v-if="mobileNavOpen" class="fixed inset-0 z-50 bg-black text-white">
+    <div v-if="mobileNavOpen" class="fixed inset-0 z-50 bg-black text-lime-200">
       <button
-        class="absolute top-6 right-11"
+        class="absolute top-12 right-16"
         aria-label="Close Menu"
         @click="toggleMobileNav"
       >

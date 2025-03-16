@@ -164,6 +164,7 @@ async function onSubmit(values: any) {
       isActive: response.is_active,
       redemptions: response.redemptions,
       created_at: response.created_at,
+      ended_at: response.ended_at,
       id: response.id,
     });
 

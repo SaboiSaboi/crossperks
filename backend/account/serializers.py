@@ -24,6 +24,7 @@ class BusinessProfileSerializer(serializers.ModelSerializer):
     category = serializers.CharField(required=False, allow_blank=True)
     website = serializers.URLField(required=False, allow_blank=True)
     phone = serializers.CharField(required=False, allow_blank=True)
+    identifiers = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = BusinessProfile
@@ -36,6 +37,8 @@ class BusinessProfileSerializer(serializers.ModelSerializer):
             "category",
             "website",
             "phone",
+            "logo",
+            "identifiers",
         ]
 
         read_only_fields = ["is_claimed", "claim_token", "qr_code"]
@@ -56,5 +59,6 @@ class PerkSerializer(serializers.ModelSerializer):
             "redemptions",
             "is_active",
             "created_at",
+            "ended_at",
         ]
         read_only_fields = ["id", "business", "created_at"]

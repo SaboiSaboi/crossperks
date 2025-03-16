@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen flex flex-col justify-center items-center bg-[#007B82] text-white font-roboto w-full"
+    class="min-h-screen flex flex-col justify-center items-center bg-black text-white font-roboto w-full"
   >
     <Header />
 
@@ -13,7 +13,7 @@
           <!-- Tagline (visible when showTagline is true) -->
           <p
             v-if="showTagline"
-            class="text-[#D1F2EB] font-normal text-4xl sm:text-5xl lg:text-5xl sm:h-[5rem] lg:h-fit"
+            class="text-white font-normal text-4xl sm:text-5xl lg:text-5xl sm:h-[5rem] lg:h-fit"
           >
             Enjoy Surprise Perks & <br />Support Local Spots Like
           </p>
@@ -29,7 +29,7 @@
         <p class="text-lg md:text-xl text-white font-normal lg:text-2xl">
           Shop as usual — Enjoy Surprise Perks along the way.
           <br class="hidden md:block" />
-          <span class="text-[#D1F2EB]">
+          <span class="text-white">
             Support businesses that match your values.
           </span>
         </p>
@@ -55,7 +55,7 @@
     <Clients />
 
     <div
-      class="min-h-screen bg-gradient-to-b from-[#D1F2EB] to-[#F5F5F5] text-[#2E294E] w-full"
+      class="min-h-screen bg-gradient-to-b from-[#F9D976] to-[#d2b48c] text-[#262626] w-full"
     >
       <section class="py-24 px-6 sm:py-32 sm:px-10 flex flex-col gap-24">
         <!-- Reusable Section Template -->
@@ -184,9 +184,8 @@
       </section>
     </div>
 
-    <!-- Call to Action Section -->
     <section
-      class="py-16 bg-[#007B82] text-white text-center w-full justify-center items-center"
+      class="py-16 bg-black text-white text-center w-full justify-center items-center"
     >
       <h2 class="text-4xl font-bold mb-6">Ready to Unlock Your Perks?</h2>
       <button

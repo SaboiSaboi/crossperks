@@ -117,8 +117,6 @@ onMounted(async () => {
     console.error("Error fetching user profile:", error);
   }
 });
-// const token = useCookie("auth_token").value;
-// if (!token) throw new Error("User is not authenticated.");
 
 const completeOnboarding = async () => {
   try {

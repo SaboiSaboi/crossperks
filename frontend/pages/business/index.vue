@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 const router = useRouter();
-// Define campaign types
 
 interface Insights {
   newCustomers: number;
@@ -19,22 +18,43 @@ const insights = ref<Insights>({
 
 const perkStore = usePerkStore();
 
-// Computed properties
 const campaignProgress = computed(() => {
   if (perkStore.perk && perkStore.perk.total) {
     return (perkStore.perk.remaining / perkStore.perk.total) * 100;
   }
-  return 0; // or any default value you'd prefer
+  return 0;
 });
 
 const generateCode = () => {
   alert("Generated new one-time use code.");
 };
 
-// const endCampaign = () => {
-//   campaign.value = null;
-//   // alert("Campaign ended. Create a new one when you're ready.");
-// };
+const endCampaign = async () => {
+  try {
+    if (!perkStore.perk) {
+      console.warn("No active campaign found.");
+      return;
+    }
+
+    const campaignId = perkStore.perk.id;
+
+    await $fetch(`http://localhost:8000/account/perks/${campaignId}/end/`, {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${useCookie("auth_token").value}`,
+      },
+    });
+
+    console.log("Campaign successfully ended.");
+
+    perkStore.clearPerk();
+    await perkStore.loadPastPerksFromDB();
+
+    router.push("/business");
+  } catch (error) {
+    console.error("Failed to end campaign:", error);
+  }
+};
 
 const { handleCheckAuth } = useAuthS();
 
@@ -202,7 +222,9 @@ onMounted(async () => {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction>Continue</AlertDialogAction>
+                          <AlertDialogAction @click="endCampaign"
+                            >Continue</AlertDialogAction
+                          >
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>

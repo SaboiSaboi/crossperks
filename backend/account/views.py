@@ -1,4 +1,5 @@
 import random
+from venv import logger
 from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,13 +10,12 @@ from .models import BusinessProfile, CustomUser, CustomerProfile, Perk
 from .serializers import (
     BusinessProfileSerializer,
     PerkSerializer,
-    UserRegistrationSerializer,
 )
+from rest_framework.generics import ListAPIView
 from knox.models import AuthToken
 from django.contrib.auth import authenticate
 from knox.auth import TokenAuthentication
 from rest_framework.generics import CreateAPIView
-
 from django.shortcuts import get_object_or_404
 
 
@@ -174,7 +174,6 @@ class VerifyCodeView(APIView):
 #                 {"error": "Email not verified or user not found."},
 #                 status=status.HTTP_404_NOT_FOUND,
 #             )
-from knox.models import AuthToken
 
 
 class CompleteRegistrationView(generics.CreateAPIView):
@@ -487,6 +486,9 @@ class GetUserAPIView(APIView):
                     "is_claimed": business.is_claimed,
                     "created_at": business.created_at,
                     "qr_code": business.qr_code_url,
+                    "identifiers": [
+                        identifier.name for identifier in business.identifiers.all()
+                    ],
                 }
         elif role == "customer":
             customer = getattr(user, "customer_profile", None)
@@ -552,8 +554,6 @@ class UserPerkView(generics.RetrieveAPIView):
     serializer_class = PerkSerializer
     permission_classes = [IsAuthenticated]
 
-    print("in the perk")
-
     def get(self, request, *args, **kwargs):
         user = request.user
         # print("finna get perk")
@@ -572,3 +572,40 @@ class UserPerksView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Perk.objects.filter(business__user=user, is_active=False)
+
+
+class EndCampaignView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, campaign_id):
+        perk = get_object_or_404(
+            Perk, id=campaign_id, business__user=request.user, is_active=True
+        )
+
+        perk.end_campaign()
+
+        return Response(
+            {
+                "message": "Campaign ended successfully",
+                "ended_at": perk.ended_at.strftime("%Y-%m-%d %H:%M:%S"),
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class BusinessProfileListView(ListAPIView):
+    queryset = BusinessProfile.objects.all()
+    serializer_class = BusinessProfileSerializer
+    permission_classes = [AllowAny]
+
+    # def list(self, request, *args, **kwargs):
+    #     try:
+    #         queryset = self.get_queryset()
+    #         serializer = self.get_serializer(queryset, many=True)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     except Exception as e:
+    #         logger.error(f"Error fetching businesses: {str(e)}", exc_info=True)
+    #         return Response(
+    #             {"error": "Internal Server Error", "details": str(e)},
+    #             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         )

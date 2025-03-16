@@ -1,6 +1,12 @@
 from django.contrib import admin
 
-from account.models import BusinessProfile, CustomUser
+from account.models import BusinessIdentifier, BusinessProfile, CustomUser
+
+
+@admin.register(BusinessIdentifier)
+class BusinessIdentifierAdmin(admin.ModelAdmin):
+    list_display = ("name",)  # Display the identifier name
+    search_fields = ("name",)  # Add search functionality
 
 
 @admin.register(BusinessProfile)

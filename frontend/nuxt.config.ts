@@ -14,4 +14,7 @@ export default defineNuxtConfig({
     prefix: "",
     componentDir: "./components/ui",
   },
+  build: {
+    transpile: ["vue-chart-3"],
+  },
 });

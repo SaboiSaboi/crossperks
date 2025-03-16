@@ -8,6 +8,7 @@ interface Perk {
   isActive: boolean;
   redemptions: number;
   created_at: string;
+  ended_at: string;
   id: number;
 }
 

@@ -67,7 +67,6 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import HeaderSignedIn from "~/components/HeaderSignedIn.vue";
 const website = "https://www.honeycomb-bakery.com";
 const BusinessProfileSchema = z.object({
   official_name: z.string(),
@@ -100,7 +99,6 @@ const formattedDate = computed(() => {
 onMounted(async () => {
   const { handleCheckAuth } = useAuthS();
   const business_user: any = await handleCheckAuth();
-  console.log("bu", business_user);
   const parsed = BusinessProfileSchema.safeParse(
     business_user.business_profile
   );
