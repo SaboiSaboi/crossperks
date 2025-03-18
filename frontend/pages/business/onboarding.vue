@@ -1,4 +1,3 @@
-<!-- pages/business/onboarding.vue -->
 <template>
   <div
     class="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8"

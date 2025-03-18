@@ -33,12 +33,20 @@
             Support businesses that match your values.
           </span>
         </p>
-        <div class="flex justify-start items-center">
-          <button
+        <div class="flex justify-start items-center gap-10">
+          <NuxtLink
+          to="/signin"
             class="text-2xl px-8 py-4 bg-yellow-400 text-[#333333] font-semibold rounded-full hover:bg-yellow-500 transition"
           >
             Join Now
-          </button>
+          </NuxtLink>
+
+          <NuxtLink to="/business" 
+          class="text-2xl px-8 py-4 bg-blue-400 text-[#333333] font-semibold rounded-full hover:bg-blue-500 transition"
+          >
+            Business
+          </NuxtLink>
+         
         </div>
       </section>
 
@@ -220,7 +228,7 @@ const businesses = [
   "Green Spa",
   "Honey Latte Cafe",
   "Book Haven",
-  "Above ground Coffee House in Portland City",
+  "Above ground Coffee",
 ];
 const typedText = ref("");
 let isTyping = false;

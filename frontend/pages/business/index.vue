@@ -1,287 +1,89 @@
-<script setup lang="ts">
-import { useRouter } from "vue-router";
-const router = useRouter();
-
-interface Insights {
-  newCustomers: number;
-  returningCustomers: number;
-  scans: number;
-  conversionRate: number;
-}
-
-const insights = ref<Insights>({
-  newCustomers: 0,
-  returningCustomers: 0,
-  scans: 0,
-  conversionRate: 0,
-});
-
-const perkStore = usePerkStore();
-
-const campaignProgress = computed(() => {
-  if (perkStore.perk && perkStore.perk.total) {
-    return (perkStore.perk.remaining / perkStore.perk.total) * 100;
-  }
-  return 0;
-});
-
-const generateCode = () => {
-  alert("Generated new one-time use code.");
-};
-
-const endCampaign = async () => {
-  try {
-    if (!perkStore.perk) {
-      console.warn("No active campaign found.");
-      return;
-    }
-
-    const campaignId = perkStore.perk.id;
-
-    await $fetch(`http://localhost:8000/account/perks/${campaignId}/end/`, {
-      method: "POST",
-      headers: {
-        Authorization: `Token ${useCookie("auth_token").value}`,
-      },
-    });
-
-    console.log("Campaign successfully ended.");
-
-    perkStore.clearPerk();
-    await perkStore.loadPastPerksFromDB();
-
-    router.push("/business");
-  } catch (error) {
-    console.error("Failed to end campaign:", error);
-  }
-};
-
-const { handleCheckAuth } = useAuthS();
-
-const business_user: any = await handleCheckAuth();
-const business = business_user.business_profile;
-
-const navigateToCampaign = (pastCampaign: any) => {
-  if (!pastCampaign.id) {
-    console.error("Attempted to navigate with an undefined campaign ID");
-    return;
-  }
-  router.push(`/business/past-campaign/${pastCampaign.id}`);
-};
-onMounted(async () => {
-  await perkStore.loadPerk();
-  await perkStore.loadPastPerksFromDB();
-});
-</script>
-
 <template>
-  <div class="min-h-screen bg-gray-50 text-gray-900">
-    <HeaderSignedIn />
-    <ClientOnly>
-      <div
-        class="shadow-md p-6 md:p-10 flex flex-col md:flex-row justify-center items-center"
-      >
-        <div class="flex flex-col justify-center items-center">
-          <h1 class="text-4xl font-extrabold text-gray-800">
-            {{ business.official_name }} Dashboard
-          </h1>
-          <p class="text-lg text-gray-600 mt-2">
-            Manage your CrossPerks campaigns and track results.
-          </p>
+  <div class="min-h-screen flex flex-col bg-black text-gray-100 font-sans w-full">
+    <HeaderBusinessPage />
+
+    <!-- Hero Section -->
+    <section class="relative flex flex-col-reverse md:flex-row items-center justify-between px-6 md:px-10 py-24 md:py-32 max-w-7xl mx-auto animate-fade-in">
+      <div class="max-w-2xl text-center md:text-left">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-white leading-tight">
+          More Customers. No Extra Work.
+        </h1>
+        <p class="text-lg text-gray-300 mt-6">
+          CrossPerks helps businesses like yours bring in new customers effortlessly. No ad spend. No complicated marketing. Just steady, organic growth through local partnerships.
+        </p>
+        <div class="mt-8 flex flex-col sm:flex-row items-center sm:space-x-4">
+          <NuxtLink
+            class="text-xl px-8 py-4 bg-blue-400 text-[#333333] font-semibold rounded-full hover:bg-blue-500 transition shadow-lg"
+            to="/signup">
+            Get Started for Free
+          </NuxtLink>
         </div>
       </div>
-      <div
-        class="max-w-6xl mx-auto p-6 md:p-10 h-screen flex flex-col justify-center"
-      >
-        <div
-          v-show="perkStore.isLoading"
-          class="flex justify-center py-5 h-[20rem]"
-        >
-          <p class="text-gray-500">Loading</p>
-        </div>
-        <div
-          class="grid grid-cols-1 md:grid-cols-3 gap-6 h-[19rem]"
-          v-show="!perkStore.isLoading && perkStore.perk"
-        >
-          <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-            <h2 class="text-xl font-semibold text-indigo-700">
-              Active Campaign
-            </h2>
-            <p class="mt-2 text-lg font-bold text-gray-800">
-              {{ perkStore.perk?.title }}
-            </p>
+      <NuxtImg 
+        src="https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg" 
+        alt="Business Growth" 
+        class="w-full md:w-1/2 max-w-lg rounded-lg shadow-lg animate-slide-up" 
+      />
+    </section>
 
-            <p class="mb-2 text-base text-gray-800">
-              {{ perkStore.perk?.description }}
-            </p>
-            <hr class="my-2" />
-            <p class="text-gray-600">
-              Perks Remaining:
-              <span class="font-semibold"
-                >{{ perkStore.perk?.remaining }} /
-                {{ perkStore.perk?.total }}</span
-              >
-            </p>
-            <p class="text-gray-600">
-              Redemptions:
-              <span class="font-semibold">{{
-                perkStore.perk?.redemptions
-              }}</span>
-            </p>
-
-            <Progress class="mt-4" :model-value="campaignProgress" />
-            <p class="mt-1 text-sm text-gray-500">
-              Redemptions: {{ campaignProgress }}%
-            </p>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-            <h2 class="text-xl font-semibold text-indigo-700">
-              Performance Insights
-            </h2>
-            <p class="mt-2 text-gray-600">
-              New Customers:
-              <span class="font-bold text-gray-800">{{
-                insights.newCustomers
-              }}</span>
-            </p>
-            <p class="text-gray-600">
-              Returning Customers:
-              <span class="font-bold text-gray-800">{{
-                insights.returningCustomers
-              }}</span>
-            </p>
-            <p class="text-gray-600">
-              Total Scans:
-              <span class="font-bold text-gray-800">{{ insights.scans }}</span>
-            </p>
-            <p class="text-gray-600">
-              Conversion Rate:
-              <span class="font-bold text-gray-800"
-                >{{ insights.conversionRate }}%</span
-              >
-            </p>
-          </div>
-
-          <div
-            class="bg-white p-6 rounded-lg shadow-lg border border-gray-200 items-center relative"
-          >
-            <h2 class="text-xl font-semibold text-indigo-700">
-              Manage Campaign
-            </h2>
-            <div class="">
-              <button
-                @click="generateCode"
-                class="mt-4 px-5 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-              >
-                Generate One-Time Code
-              </button>
+    <!-- The CrossPerks Effect -->
+    <section class="px-6 md:px-10 py-24 bg-[]  text-center animate-fade-in">
+      <h2 class="text-4xl md:text-5xl font-extrabold mb-8 text-blue-400 text-balance">
+        A New Way to Attract & Keep Customers
+      </h2>
+      <p class="text-lg text-gray-300 max-w-3xl mx-auto mb-12 text-balance">
+        What if your best customers came from next door? CrossPerks turns casual shoppers into loyal fans—effortlessly.
+      </p>
+      <div class="grid md:grid-cols-2 gap-16 items-center text-left ">
+        <div class="flex justify-center">
+          <NuxtImg 
+          src="https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg" 
+          alt="Customer Engagement" 
+          class="w-full max-w-lg rounded-xl shadow-lg " 
+        /></div>
+        <div class="flex flex-col space-y-10 ">
+          <div v-for="(feature, index) in features" :key="index" class="flex items-start space-x-4">
+            <div>
+              <h3 class="text-3xl font-semibold text-blue-400">{{ feature.title }}</h3>
+              <p class="text-gray-300 mt-3 text-lg text-balance">{{ feature.description }}</p>
             </div>
-            <div
-              class="absolute bottom-0 left-0 mb-4 ml-3 text-lg flex justify-center items-center hover:bg-none"
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                  <Button variant="ghost">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      class="size-6"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
-                      />
-                    </svg>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent class="w-56">
-                  <DropdownMenuLabel class="flex justify-center"
-                    >Edit Campaign</DropdownMenuLabel
-                  >
-                  <DropdownMenuSeparator />
-                  <Button variant="ghost" class="flex justify-center w-full">
-                    <AlertDialog>
-                      <AlertDialogTrigger as-child>
-                        <span> End </span>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle
-                            >Are you sure you want to end this
-                            campaign?</AlertDialogTitle
-                          >
-                          <AlertDialogDescription>
-                            Ending this campaign will archive it permanently.
-                            This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction @click="endCampaign"
-                            >Continue</AlertDialogAction
-                          >
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </Button>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </div>
-
-        <span v-show="!perkStore.isLoading && !perkStore.perk">
-          <div class="flex flex-col items-center justify-center py-20">
-            <h2 class="text-2xl font-bold text-gray-800">No Active Campaign</h2>
-            <p class="text-gray-600 mt-2 text-lg">
-              Create a new campaign to start sending and receiving referrals.
-            </p>
-            <CampaignModal />
-          </div>
-        </span>
-        <div class="mt-10">
-          <h2 class="text-2xl font-extrabold text-gray-800">Past Campaigns</h2>
-
-          <!-- ✅ Show a loading indicator while past perks are loading -->
-          <div v-if="perkStore.isLoading" class="flex justify-center py-5">
-            <p class="text-gray-500">Loading past campaigns...</p>
-          </div>
-
-          <!-- ✅ Display past campaigns once loaded -->
-          <div
-            v-else-if="perkStore.pastPerks && perkStore.pastPerks.length > 0"
-            class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
-            <div
-              v-for="past in perkStore.pastPerks"
-              :key="past.id"
-              @click="navigateToCampaign(past)"
-              class="bg-white p-6 rounded-lg shadow-lg border border-gray-200"
-            >
-              <p class="text-lg font-bold text-gray-800">{{ past.title }}</p>
-              <p class="text-lg text-gray-800">{{ past.description }}</p>
-              <p class="text-lg text-gray-800">Total: {{ past.total }}</p>
-              <p class="text-gray-600">
-                Redemptions:
-                <span class="font-semibold">{{ past.redemptions }}</span>
-              </p>
-              <p class="text-gray-600">
-                Total Scans: <span class="font-semibold">{{ past.total }}</span>
-              </p>
-            </div>
-          </div>
-
-          <!-- ✅ Show this if there are no past perks -->
-          <div v-else class="mt-24 text-lg flex justify-center items-center">
-            No past campaigns yet
           </div>
         </div>
       </div>
-    </ClientOnly>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="py-24 bg-gradient-to-br from-blue-800 to-blue-900 text-white text-center animate-fade-in">
+      <h2 class="text-4xl font-bold mb-6">Let’s Grow Your Business Together</h2>
+      <p class=" text-balance text-lg mb-8">Join CrossPerks today and start bringing in more customers—without lifting a finger.</p>
+      <NuxtLink
+        to="/signup"
+        class="bg-blue-600 text-white px-10 py-4 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg">
+        Join for Free
+      </NuxtLink>
+    </section>
+
+    <Footer />
   </div>
 </template>
+
+<script setup>
+const features = [
+  {
+    title: "Your Customers Get Rewarded",
+    description: "When they shop with you, they unlock an exclusive surprise at a neighboring business."
+  },
+  {
+    title: "New Faces Walk Through Your Door",
+    description: "Other businesses send their customers your way. No ads. No effort. Just foot traffic."
+  },
+  {
+    title: "Casual Shoppers Become Regulars",
+    description: "A single perk turns into repeat visits, building a loyal customer base with zero extra work."
+  },
+  {
+    title: "Your Business Thrives",
+    description: "More customers, more revenue—without changing a thing. Just let CrossPerks do the work."
+  }
+];
+</script>

@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (
     BusinessDetailView,
+    BusinessIdentifierListView,
     BusinessListView,
     BusinessOnboardingView,
     BusinessProfileListView,
@@ -45,4 +46,5 @@ urlpatterns = [
         "perks/<int:campaign_id>/end/", EndCampaignView.as_view(), name="end_campaign"
     ),
     path("businesses/", BusinessProfileListView.as_view(), name="business-list"),
+    path("identifiers/", BusinessIdentifierListView.as_view(), name="identifier-list"),
 ]

@@ -56,9 +56,15 @@ import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
           <NavigationMenu>
             <NavigationMenuList class="flex gap-7">
               <NavigationMenuItem class="text-slate-200 hover:text-slate-50">
-                <NavigationMenuLink href="/business" class="hover:underline text-2xl">
-                  <p class="hover:underline text-2xl">Business</p>
+                <NavigationMenuLink href="/businesses" class="hover:underline text-2xl">
+                  <p class="hover:underline text-2xl">Businesses</p>
                 </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem class="text-slate-200 hover:text-slate-50">
+                <NavigationMenuLink href="/business" class="hover:underline text-2xl">
+                  <p class="hover:underline text-2xl">FAQs</p>
+                </NavigationMenuLink>
+                
               </NavigationMenuItem>
               <NavigationMenuItem class="text-slate-200 hover:text-slate-50">
                 <NavigationMenuLink href="/signin" class="hover:underline text-xl">
@@ -71,7 +77,7 @@ import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
                   :class="navigationMenuTriggerStyle()"
                   class="text-black text-4xl bg-slate-200 hover:bg-slate-50 border-[1.5px] border-black px-4 py-2 rounded-full transition-all"
                 >
-                  Join Now
+                  Get Started
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>

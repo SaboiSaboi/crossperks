@@ -6,7 +6,13 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import BusinessProfile, CustomUser, CustomerProfile, Perk
+from .models import (
+    BusinessIdentifier,
+    BusinessProfile,
+    CustomUser,
+    CustomerProfile,
+    Perk,
+)
 from .serializers import (
     BusinessProfileSerializer,
     PerkSerializer,
@@ -542,7 +548,6 @@ class BusinessOnboardingView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        # Mark user as onboarded
         user = request.user
         user.is_onboarded = True
         user.save()
@@ -609,3 +614,11 @@ class BusinessProfileListView(ListAPIView):
     #             {"error": "Internal Server Error", "details": str(e)},
     #             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
     #         )
+
+
+class BusinessIdentifierListView(APIView):
+    permission_classes = [AllowAny]  # Allow public access
+
+    def get(self, request):
+        identifiers = BusinessIdentifier.objects.all().values("id", "name")
+        return Response(identifiers)

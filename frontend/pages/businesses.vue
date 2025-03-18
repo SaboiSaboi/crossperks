@@ -23,7 +23,7 @@
         <div
           v-for="business in businesses"
           :key="business.id"
-          class="business-card"
+          class="bg-white shadow-lg rounded-lg overflow-hidden border hover:shadow-xl transition-all duration-300"
         >
           <!-- Business Logo or Placeholder -->
           <div
@@ -57,11 +57,11 @@
             <h2 class="text-lg font-semibold text-gray-900">
               {{ business.official_name }}
             </h2>
-            <div class="identifier-list">
+            <div class="flex flex-wrap gap-2 mt-3">
               <span
                 v-for="tag in business.identifiers"
                 :key="tag"
-                class="identifier-badge"
+                class="text-sm font-medium px-3 py-1 rounded-full bg-blue-100 text-blue-700"
               >
                 {{ tag }}
               </span>
@@ -71,16 +71,6 @@
       </div>
     </div>
 
-    <!-- Footer -->
-    <!-- <footer
-      class="mt-16 text-center text-gray-400 text-sm px-4 max-w-3xl mx-auto"
-    >
-      <p>
-        CrossPerks helps you discover and support local businesses that align
-        with your values. Shop small, earn perks, and make a difference in your
-        community.
-      </p>
-    </footer> -->
     <Footer />
   </div>
 </template>
@@ -108,15 +98,15 @@ onMounted(fetchBusinesses);
 </script>
 
 <style scoped>
-.business-card {
+/* .business-card {
   @apply bg-white shadow-lg rounded-lg overflow-hidden border hover:shadow-xl transition-all duration-300;
-}
+} */
 
-.identifier-list {
+/* .identifier-list {
   @apply flex flex-wrap gap-2 mt-3;
-}
+} */
 
-.identifier-badge {
+/* .identifier-badge {
   @apply text-sm font-medium px-3 py-1 rounded-full bg-blue-100 text-blue-700;
-}
+} */
 </style>
