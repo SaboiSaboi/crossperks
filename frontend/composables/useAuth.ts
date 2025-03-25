@@ -123,8 +123,6 @@ export const useAuthS = () => {
   }
 
   async function handleLogin(loginArgs: z.infer<typeof UserLoginSchema>) {
-    console.log("in the handlelogin");
-
     const data = await $fetch(`/account/login/`, {
       method: "POST",
       body: loginArgs,
