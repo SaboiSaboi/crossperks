@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BusinessProfile, CustomUser, Perk
+from .models import BusinessIdentifier, BusinessProfile, CustomUser, Perk
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -20,11 +20,37 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
+# class BusinessProfileSerializer(serializers.ModelSerializer):
+#     category = serializers.CharField(required=False, allow_blank=True)
+#     website = serializers.URLField(required=False, allow_blank=True)
+#     phone = serializers.CharField(required=False, allow_blank=True)
+#     identifiers = serializers.StringRelatedField(many=True)
+
+#     class Meta:
+#         model = BusinessProfile
+#         fields = [
+#             "official_name",
+#             "street_address",
+#             "city",
+#             "state",
+#             "zip_code",
+#             "category",
+#             "website",
+#             "phone",
+#             "logo",
+#             "identifiers",
+#         ]
+
+#         read_only_fields = ["is_claimed", "claim_token", "qr_code"]
 class BusinessProfileSerializer(serializers.ModelSerializer):
     category = serializers.CharField(required=False, allow_blank=True)
     website = serializers.URLField(required=False, allow_blank=True)
     phone = serializers.CharField(required=False, allow_blank=True)
-    identifiers = serializers.StringRelatedField(many=True)
+    
+    # ✅ Accept IDs when writing (update)
+    identifiers = serializers.PrimaryKeyRelatedField(
+        queryset=BusinessIdentifier.objects.all(), many=True, required=False
+    )
 
     class Meta:
         model = BusinessProfile
@@ -40,9 +66,13 @@ class BusinessProfileSerializer(serializers.ModelSerializer):
             "logo",
             "identifiers",
         ]
-
         read_only_fields = ["is_claimed", "claim_token", "qr_code"]
 
+    def to_representation(self, instance):
+        """Customize output to return identifier names instead of IDs."""
+        data = super().to_representation(instance)
+        data["identifiers"] = [identifier.name for identifier in instance.identifiers.all()]
+        return data
 
 class PerkSerializer(serializers.ModelSerializer):
     """Serializer for Perk model"""
