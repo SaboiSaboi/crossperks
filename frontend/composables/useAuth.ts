@@ -261,16 +261,16 @@ export const useAuthS = () => {
   }
 
   async function handleCheckAuth() {
-    let token = null;
+    let token: string | null = null;
 
     if (import.meta.server) {
       const cookies = useRequestHeaders(["cookie"]).cookie;
       const match = cookies?.match(/auth_token=([^;]+)/);
-      token = match?.[1];
+      token = match?.[1] ?? null;
     }
 
     if (import.meta.client) {
-      token = useCookie("auth_token").value;
+      token = useCookie("auth_token").value ?? null;
     }
 
     if (token) {
