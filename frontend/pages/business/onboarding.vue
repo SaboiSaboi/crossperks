@@ -1,3 +1,85 @@
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+const allIdentifiers = ref<any>([]);
+const router = useRouter();
+const { handleCheckAuth } = useAuthS();
+
+const business = ref({
+  official_name: "",
+  street_address: "",
+  city: "",
+  state: "",
+  zip_code: "",
+  category: "",
+  website: "",
+  phone: "",
+  identifiers: [],
+});
+
+onMounted(async () => {
+  try {
+    const user: any = await handleCheckAuth();
+    const businessProfile = user.business_profile;
+
+    business.value = {
+      official_name: businessProfile.official_name,
+      street_address: businessProfile.street_address,
+      city: businessProfile.city,
+      state: businessProfile.state,
+      zip_code: businessProfile.zip_code,
+      category: "",
+      website: "https://www.somewebsite.com",
+      phone: "",
+      identifiers: businessProfile.identifiers,
+    };
+    const response: any = await $fetch(
+      "http://localhost:8000/account/identifiers/"
+    );
+    allIdentifiers.value = response;
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+  }
+});
+
+const getIdentifierIds = (selectedNames) => {
+  return allIdentifiers.value
+    .filter((identifier) => selectedNames.includes(identifier.name))
+    .map((identifier) => identifier.id);
+};
+
+const completeOnboarding = async () => {
+  try {
+    const token = useCookie("auth_token");
+
+    await $fetch("http://localhost:8000/account/onboarding/", {
+      method: "PUT",
+      headers: {
+        Authorization: `Token ${token.value}`,
+      },
+      body: {
+        ...business.value,
+        identifiers: getIdentifierIds(business.value.identifiers),
+      },
+    });
+
+    router.replace("/business");
+  } catch (error) {
+    console.error("Failed to complete onboarding:", error);
+    alert("Failed to complete onboarding. Please try again.");
+  }
+};
+</script>
 <template>
   <div
     class="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8"
@@ -62,77 +144,28 @@
             />
           </div>
 
+          <div>
+            <Label>Select Your Business Identifiers</Label>
+            <div class="grid grid-cols-2 gap-2 mt-2">
+              <label
+                v-for="identifier in allIdentifiers"
+                :key="identifier.id"
+                class="flex items-center space-x-2"
+              >
+                <input
+                  type="checkbox"
+                  :value="identifier.name"
+                  v-model="business.identifiers"
+                  class="rounded border-gray-300"
+                />
+                <span>{{ identifier.name }}</span>
+              </label>
+            </div>
+          </div>
+
           <Button type="submit" class="w-full">Save & Complete</Button>
         </form>
       </CardContent>
     </Card>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-
-const router = useRouter();
-const { handleCheckAuth } = useAuthS();
-
-const business = ref({
-  official_name: "",
-  street_address: "",
-  city: "",
-  state: "",
-  zip_code: "",
-  category: "",
-  website: "",
-  phone: "",
-});
-
-onMounted(async () => {
-  try {
-    const user: any = await handleCheckAuth();
-    const businessProfile = user.business_profile;
-
-    business.value = {
-      official_name: businessProfile.official_name,
-      street_address: businessProfile.street_address,
-      city: businessProfile.city,
-      state: businessProfile.state,
-      zip_code: businessProfile.zip_code,
-      category: "",
-      website: "https://www.somewebsite.com",
-      phone: "",
-    };
-  } catch (error) {
-    console.error("Error fetching user profile:", error);
-  }
-});
-
-const completeOnboarding = async () => {
-  try {
-    const token = useCookie("auth_token");
-
-    await $fetch("http://localhost:8000/account/onboarding/", {
-      method: "PUT",
-      headers: {
-        Authorization: `Token ${token.value}`,
-      },
-      body: business.value,
-    });
-
-    router.replace("/business");
-  } catch (error) {
-    console.error("Failed to complete onboarding:", error);
-    alert("Failed to complete onboarding. Please try again.");
-  }
-};
-</script>
