@@ -152,7 +152,7 @@ AWS_S3_CUSTOM_DOMAIN = (
     f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
 )
 
-STATICFILES_STORAGE = "storages.backends.s3.S3Storage"
+# STATICFILES_STORAGE = "storages.backends.s3.S3Storage"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 MEDIA_URL = "/media/"
@@ -169,8 +169,11 @@ STORAGES = {
             "region_name": os.getenv("AWS_S3_REGION_NAME"),
         },
     },
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+   "staticfiles": {
+        "BACKEND": "storages.backends.s3.S3Storage", 
+    },
+    "media": {
+        "BACKEND": "storages.backends.s3.S3Storage",  
     },
 }
 

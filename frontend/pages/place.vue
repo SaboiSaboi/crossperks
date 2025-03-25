@@ -1,6 +1,5 @@
 <template>
   <div class="container flex flex-col items-center mt-8">
-    <!-- Button triggers print logic -->
     <button
       @click="printCard"
       class="bg-blue-500 text-white px-4 py-2 text-lg font-bold rounded-md hover:bg-blue-600"
@@ -8,12 +7,10 @@
       Print Card
     </button>
 
-    <!-- The card layout is hidden on-screen, only used in the print window -->
     <div
       ref="printSection"
       class="cut-card card-wrapper flex flex-col items-center justify-between"
     >
-      <!-- Banner / Business Info -->
       <div class="banner w-full p-2 text-center">
         <h1
           class="business-name text-black font-roboto font-semibold text-sm uppercase"
@@ -25,14 +22,12 @@
         </p>
       </div>
 
-      <!-- Main Message -->
       <p
         class="text-2xl font-roboto font-bold text-gray-900 text-balance px-2 py-1"
       >
         Scan to discover a surprise perk!
       </p>
 
-      <!-- QR Section -->
       <div class="qr-section flex flex-col items-center justify-center my-1">
         <img
           :src="qrCodeUrl"
@@ -41,7 +36,6 @@
         />
       </div>
 
-      <!-- Footer -->
       <div class="footer text-xs text-gray-600 mb-1">
         <p>
           Powered by
@@ -54,12 +48,10 @@
 </template>
 
 <script setup lang="ts">
-// Example data (could be props or fetched from an API)
 const businessName = ref("Champion Central Spot Barbershop");
 const perkMessage = ref("Thanks for shopping. Please call again!");
 const qrData = ref("https://crossperks.com/surprise-perk");
 
-// Generate a QR Code link
 const qrCodeUrl = computed(
   () =>
     `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
@@ -72,11 +64,9 @@ const printCard = () => {
   const printWindow = window.open("", "", "width=600,height=400");
   if (!printWindow) return;
 
-  // Open and close the blank doc
   printWindow.document.open();
   printWindow.document.close();
 
-  // Full HTML for the new window
   const fullHTML = `
     <!DOCTYPE html>
     <html>
@@ -191,7 +181,6 @@ const printCard = () => {
     </html>
   `;
 
-  // Inject full HTML into the new window (no inline script tag).
   printWindow.document.documentElement.innerHTML = fullHTML;
 };
 </script>
@@ -201,5 +190,3 @@ const printCard = () => {
   display: none;
 }
 </style>
-
-<!-- <script setup lang="ts"></script> -->

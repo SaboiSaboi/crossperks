@@ -1,3 +1,48 @@
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import { z } from "zod";
+
+const BusinessSchema = z.object({
+  category: z.string(),
+  city: z.string(),
+  identifiers: z.array(z.string()),
+  logo: z.string().nullable(),
+  official_name: z.string(),
+  phone: z.string(),
+  state: z.string(),
+  street_address: z.string(),
+  website: z.string().url(),
+  zip_code: z.string(),
+});
+
+type BusinessType = z.infer<typeof BusinessSchema>;
+
+const businesses = ref<BusinessType[]>([]);
+const loading = ref(true);
+const error = ref<string | null>(null);
+
+const fetchBusinesses = async () => {
+  try {
+    const response = await $fetch("http://127.0.0.1:8000/account/businesses/");
+    const parsedResponse = z.array(BusinessSchema).safeParse(response);
+
+    if (!parsedResponse.success) {
+      console.error("Validation Error:", parsedResponse.error);
+      error.value = "Invalid data format received.";
+      return;
+    }
+    businesses.value = parsedResponse.data;
+  } catch (err) {
+    console.error("Error fetching businesses:", err);
+    error.value = "Failed to load businesses.";
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(fetchBusinesses);
+</script>
+
 <template>
   <div class="bg-black min-h-screen">
     <Header />
@@ -20,12 +65,12 @@
         v-if="businesses.length"
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
       >
-        <div
+        <NuxtLink
           v-for="business in businesses"
-          :key="business.id"
+          :key="business.official_name"
+          :to="`/${business.website}`"
           class="bg-white shadow-lg rounded-lg overflow-hidden border hover:shadow-xl transition-all duration-300"
         >
-          <!-- Business Logo or Placeholder -->
           <div
             class="relative w-full h-44 flex items-center justify-center bg-gray-100 rounded-t-lg"
           >
@@ -67,7 +112,7 @@
               </span>
             </div>
           </div>
-        </div>
+        </NuxtLink>
       </div>
     </div>
 
@@ -75,38 +120,4 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from "vue";
-
-const businesses = ref([]);
-const loading = ref(true);
-const error = ref(null);
-
-const fetchBusinesses = async () => {
-  try {
-    const response = await $fetch("http://127.0.0.1:8000/account/businesses/");
-    businesses.value = response;
-  } catch (err) {
-    console.error("Error fetching businesses:", err);
-    error.value = "Failed to load businesses.";
-  } finally {
-    loading.value = false;
-  }
-};
-
-onMounted(fetchBusinesses);
-</script>
-
-<style scoped>
-/* .business-card {
-  @apply bg-white shadow-lg rounded-lg overflow-hidden border hover:shadow-xl transition-all duration-300;
-} */
-
-/* .identifier-list {
-  @apply flex flex-wrap gap-2 mt-3;
-} */
-
-/* .identifier-badge {
-  @apply text-sm font-medium px-3 py-1 rounded-full bg-blue-100 text-blue-700;
-} */
-</style>
+<style scoped></style>
