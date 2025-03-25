@@ -125,8 +125,6 @@ export const useAuthS = () => {
       baseURL: "http://localhost:8000",
     });
 
-    console.log("response", data);
-
     return UserSchemaLogin.parse(data);
   }
 
@@ -155,7 +153,7 @@ export const useAuthS = () => {
           } else {
             navigateTo(
               {
-                path: "/business",
+                path: "/business/dashboard",
               },
               { replace: true }
             );
@@ -163,7 +161,7 @@ export const useAuthS = () => {
         } else {
           navigateTo(
             {
-              path: "/customer",
+              path: "/customer/",
             },
             {
               replace: true,
