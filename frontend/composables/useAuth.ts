@@ -36,7 +36,6 @@ export const useAuthS = () => {
     return data;
   }
 
-  // Step 3: Complete Registration (Set Password)
   async function completeUserRegistration({
     email,
     password,
@@ -53,7 +52,6 @@ export const useAuthS = () => {
     return UserSchema.parse(data);
   }
 
-  // Register User Mutation Logic
   const { mutate: sendCodeMutate } = useMutation({
     mutationFn: sendVerificationCode,
   });
@@ -92,7 +90,6 @@ export const useAuthS = () => {
     });
   }
 
-  // Handle Email Verification Code Submission
   async function verifyCode(email: string, code: string) {
     verifyCodeMutate(
       { email, code },
@@ -107,7 +104,6 @@ export const useAuthS = () => {
     );
   }
 
-  // Handle Completing Registration by Setting Password
   async function completeRegistration(email: string, password: string) {
     completeRegistrationMutate(
       { email, password },
@@ -215,18 +211,10 @@ export const useAuthS = () => {
   }
 
   function getToken() {
-    // const cookie = getCookie("cookie");
-    // const cookies = useRequestHeaders(["cookie"]).cookie;
     const match = document.cookie.match(
       new RegExp("(^| )" + "auth_token" + "=([^;]+)")
     );
 
-    // if (match) {
-    //   match[2];
-    // } else {
-    //   console.log("No auth_token cookie found");
-    //   return navigateTo("/signin");
-    // }
     if (!match) {
       return navigateTo("/signin");
     }
