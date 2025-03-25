@@ -534,19 +534,25 @@ class CreatePerkView(CreateAPIView):
 
 
 class BusinessOnboardingView(generics.UpdateAPIView):
+
     serializer_class = BusinessProfileSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return get_object_or_404(BusinessProfile, user=self.request.user)
-
+   
     def update(self, request, *args, **kwargs):
         business_profile = self.get_object()
+        print("all is well", business_profile)
         serializer = self.serializer_class(
             business_profile, data=request.data, partial=True
         )
+        print("done with serialize", serializer)
         serializer.is_valid(raise_exception=True)
+        print("finna print now")
         serializer.save()
+        
+        print("done saving")
 
         user = request.user
         user.is_onboarded = True
