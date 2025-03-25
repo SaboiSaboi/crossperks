@@ -32,8 +32,9 @@
     <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
       <form @submit.prevent="handleSubmit">
         <div v-if="selected === 'customer' || selected === 'business'">
-          <label class="block mb-2 font-medium">Email</label>
-          <input
+          <Label class="block mb-2 font-medium" for="email">Email</Label>
+          <Input
+            id="email"
             type="email"
             placeholder="Your Email"
             class="w-full p-3 mb-4 border rounded-lg"
@@ -57,10 +58,11 @@
           </button>
 
           <div v-if="emailSent && !isVerified">
-            <label class="block mb-2 font-medium"
-              >Enter Verification Code</label
+            <Label class="block mb-2 font-medium" for="verificationCode"
+              >Enter Verification Code</Label
             >
-            <input
+            <Input
+              id="verificationCode"
               type="text"
               placeholder="Verification Code"
               class="w-full p-3 mb-4 border rounded-lg"
@@ -82,23 +84,30 @@
           </div>
 
           <div v-if="isVerified">
-            <Label class="block mb-2 font-medium">Name</Label>
-            <input
+            <Label class="block mb-2 font-medium" for="userName">Name</Label>
+            <Input
+              id="userName"
               v-model="userName"
               type="text"
               placeholder="Your Name"
               required
               class="w-full p-3 mb-4 border rounded-lg"
-            /><label class="block mb-2 font-medium">Password</label>
-            <input
+            /><Label for="userPassword" class="block mb-2 font-medium"
+              >Password</Label
+            >
+            <Input
+              id="userPassword"
               type="password"
               placeholder="Password"
               class="w-full p-3 mb-4 border rounded-lg"
               v-model="userPassword"
             />
 
-            <label class="block mb-2 font-medium">Confirm Password</label>
-            <input
+            <Label for="confirmPassword" class="block mb-2 font-medium"
+              >Confirm Password</Label
+            >
+            <Input
+              id="confirmPassword"
               type="password"
               placeholder="Confirm Password"
               class="w-full p-3 mb-4 border rounded-lg"

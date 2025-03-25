@@ -2,23 +2,23 @@
   <div
     class="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-10"
   >
-    <!-- Header -->
     <NuxtLink to="/" class="text-3xl font-bold mb-6">CrossPerks</NuxtLink>
     <h2 class="text-4xl mb-10">Sign Into Your Account</h2>
 
-    <!-- Sign-In Form Section -->
     <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
       <form @submit.prevent="handleSignIn">
-        <label class="block mb-2 font-medium">Email</label>
-        <input
+        <Label class="block mb-2 font-medium" for="email">Email</Label>
+        <Input
+          id="email"
           type="email"
           placeholder="Your Email"
           class="w-full p-3 mb-4 border rounded-lg"
           v-model="email"
         />
 
-        <label class="block mb-2 font-medium">Password</label>
-        <input
+        <Label class="block mb-2 font-medium" for="password">Password</Label>
+        <Input
+          id="password"
           type="password"
           placeholder="Your Password"
           class="w-full p-3 mb-6 border rounded-lg"
