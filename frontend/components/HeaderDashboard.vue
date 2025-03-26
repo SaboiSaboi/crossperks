@@ -1,29 +1,8 @@
 <script setup lang="ts">
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
-const user = ref<{
-  user?: {
-    id: number;
-    name: string;
-    email: string;
-    user_type: string;
-    is_onboarded: boolean;
-  };
-  auth_token?: string;
-  business_profile?: {
-    official_name: string;
-    street_address: string;
-    city: string;
-    state: string;
-    zip_code: string;
-    is_claimed: boolean;
-    created_at: string;
-    qr_code: string;
-    identifiers: string[];
-  };
-} | null>(null);
+
 const { handleCheckAuth, logout } = useAuthS();
-user.value = (await handleCheckAuth()) ?? null;
-const userType = user.value?.user?.user_type;
+const user: any = await handleCheckAuth();
 </script>
 
 <template>
@@ -103,17 +82,17 @@ const userType = user.value?.user?.user_type;
         <nav class="hidden sm:flex sm:grow sm:justify-end">
           <NavigationMenu>
             <NavigationMenuList class="flex gap-7">
-              <NavigationMenuItem
+              <!-- <NavigationMenuItem
                 v-show="user"
                 class="text-slate-200 hover:text-slate-50"
               >
                 <NavigationMenuLink
-                  :href="`${userType}/dashboard`"
+                  :href="`${user.user.user_type}/dashboard`"
                   class="hover:underline text-xl"
                 >
-                  <p class="hover:underline text-xl">Dashboard</p>
+                  <p class="hover:underline text-xl">Dashboard button</p>
                 </NavigationMenuLink>
-              </NavigationMenuItem>
+              </NavigationMenuItem> -->
               <NavigationMenuItem class="text-slate-200 hover:text-slate-50">
                 <NavigationMenuLink
                   href="/businesses"
