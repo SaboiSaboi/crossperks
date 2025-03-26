@@ -44,18 +44,20 @@ onMounted(fetchBusinesses);
 </script>
 
 <template>
-  <div class="bg-black min-h-screen">
+  <div
+    class="min-h-screen flex flex-col justify-center items-center bg-black text-white w-full"
+  >
     <Header />
 
-    <div class="max-w-6xl mx-auto px-4 my-16">
+    <div class="max-w-6xl mx-auto px-4 my-16 h-[90dvh] font-roboto">
       <h1 class="text-4xl font-bold text-white text-center my-12">
         Discover Local Businesses
       </h1>
 
       <!-- Loading & Error Handling -->
-      <div v-if="loading" class="text-center text-white">
+      <!-- <div v-if="loading" class="text-center text-white">
         Loading businesses...
-      </div>
+      </div> -->
       <div v-if="error" class="text-center text-red-500">
         Failed to load data.
       </div>
