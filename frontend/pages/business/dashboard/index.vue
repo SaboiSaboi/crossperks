@@ -76,7 +76,7 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-gray-50 text-gray-900">
-    <HeaderSignedIn />
+    <section class="bg-gray-950"><HeaderDashboard /></section>
     <ClientOnly>
       <div
         class="shadow-md p-6 md:p-10 flex flex-col md:flex-row justify-center items-center"
@@ -239,7 +239,8 @@ onMounted(async () => {
           <div class="flex flex-col items-center justify-center py-20">
             <h2 class="text-2xl font-bold text-gray-800">No Active Campaign</h2>
             <p class="text-gray-600 mt-2 text-lg">
-              A campaign is a [blank]. Create one to start sending and receiving referrals.
+              A campaign is a [blank]. Create one to start sending and receiving
+              referrals.
             </p>
             <CampaignModal />
           </div>
