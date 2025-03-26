@@ -1,10 +1,36 @@
+<script setup lang="ts">
+const { handleCheckAuth } = useAuthS();
+const user = await handleCheckAuth();
+const features = [
+  {
+    title: "Your Customers Get Rewarded",
+    description:
+      "When they shop with you, they unlock an exclusive surprise at a neighboring business.",
+  },
+  {
+    title: "New Faces Walk Through Your Door",
+    description:
+      "Other businesses send their customers your way. No ads. No effort. Just foot traffic and business growth.",
+  },
+  {
+    title: "Casual Shoppers Become Regulars",
+    description:
+      "A single perk turns into repeat visits, building a loyal customer base with zero extra work.",
+  },
+  {
+    title: "Your Business Thrives",
+    description:
+      "More customers, more revenue—without changing a thing. Just let CrossPerks do the work.",
+  },
+];
+</script>
+
 <template>
   <div
     class="min-h-screen flex flex-col bg-black text-gray-100 font-sans w-full"
   >
-    <HeaderBusinessPage />
+    <Header />
 
-    <!-- Hero Section -->
     <section
       class="relative flex flex-col-reverse md:flex-row items-center justify-between px-6 md:px-10 py-24 md:py-32 max-w-7xl mx-auto animate-fade-in"
     >
@@ -19,7 +45,10 @@
           effortlessly. No ad spend. No complicated marketing. Just steady,
           organic growth through offering perks.
         </p>
-        <div class="mt-8 flex flex-col sm:flex-row items-center sm:space-x-4">
+        <div
+          v-show="!user"
+          class="mt-8 flex flex-col sm:flex-row items-center sm:space-x-4"
+        >
           <NuxtLink
             class="text-xl px-8 py-4 bg-blue-400 text-[#333333] font-semibold rounded-full hover:bg-blue-500 transition shadow-lg"
             to="/signup"
@@ -35,7 +64,6 @@
       />
     </section>
 
-    <!-- The CrossPerks Effect -->
     <section class="px-6 md:px-10 py-24 bg-[] text-center animate-fade-in">
       <h2
         class="text-4xl md:text-5xl font-extrabold mb-8 text-blue-400 text-balance"
@@ -78,11 +106,12 @@
       class="py-24 bg-gradient-to-br from-blue-900 to-blue-950 text-white text-center animate-fade-in"
     >
       <h2 class="text-4xl font-bold mb-6">Let’s Grow Your Business Together</h2>
-      <p class="text-balance text-lg mb-8">
+      <p v-show="!user" class="text-balance text-lg mb-8">
         Join CrossPerks today and start bringing in more customers—without
         lifting a finger.
       </p>
       <NuxtLink
+        v-show="!user"
         to="/signup"
         class="bg-yellow-600 text-white px-10 py-4 rounded-full hover:bg-yellow-700 transition-transform transform hover:scale-105 shadow-lg"
       >
@@ -93,28 +122,3 @@
     <Footer />
   </div>
 </template>
-
-<script setup>
-const features = [
-  {
-    title: "Your Customers Get Rewarded",
-    description:
-      "When they shop with you, they unlock an exclusive surprise at a neighboring business.",
-  },
-  {
-    title: "New Faces Walk Through Your Door",
-    description:
-      "Other businesses send their customers your way. No ads. No effort. Just foot traffic and business growth.",
-  },
-  {
-    title: "Casual Shoppers Become Regulars",
-    description:
-      "A single perk turns into repeat visits, building a loyal customer base with zero extra work.",
-  },
-  {
-    title: "Your Business Thrives",
-    description:
-      "More customers, more revenue—without changing a thing. Just let CrossPerks do the work.",
-  },
-];
-</script>
