@@ -1,23 +1,61 @@
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+
+const { handleCheckAuth } = useAuthS();
+const user = await handleCheckAuth();
+
+const showTagline = ref(false);
+const businesses = [
+  "Nossa Familia Coffee-Portland",
+  "Zen Gym",
+  "Green Spa",
+  "Honey Latte Cafe",
+  "Book Haven",
+  "Above ground Coffee",
+];
+const typedText = ref("");
+let isTyping = false;
+
+const typeText = async (text) => {
+  if (isTyping) return;
+  isTyping = true;
+  typedText.value = "";
+  for (let i = 0; i < text.length; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    typedText.value += text[i];
+  }
+  isTyping = false;
+};
+
+onMounted(() => {
+  showTagline.value = true;
+  let i = 0;
+  const switchText = () => {
+    typeText(businesses[i % businesses.length]);
+    i++;
+  };
+  switchText();
+  setInterval(switchText, 4000);
+});
+</script>
+
 <template>
   <div
-    class="min-h-screen flex flex-col justify-center items-center bg-black text-white font-roboto w-full"
+    class="min-h-screen flex flex-col justify-center items-center bg-black text-white w-full"
   >
     <Header />
 
     <div
-      class="flex flex-col items-center gap-6 p-4 sm:p-16 rounded-lg w-full lg:flex lg:flex-row lg:gap-4"
+      class="flex flex-col items-center gap-6 p-4 sm:p-16 rounded-lg w-full lg:flex lg:flex-row lg:gap-4 font-roboto"
     >
-      <!-- Text Section -->
       <section class="flex flex-col gap-8 w-full lg:w-1/2 lg:text-left py-4">
         <div class="">
-          <!-- Tagline (visible when showTagline is true) -->
           <p
             v-if="showTagline"
             class="text-white font-normal text-4xl sm:text-5xl lg:text-5xl sm:h-[5rem] lg:h-fit"
           >
             Enjoy Surprise Perks & <br />Support Local Spots Like
           </p>
-          <!-- Typing Text -->
           <p
             class="w-fit font-bold text-yellow-400 text-3xl md:text-3xl lg:text-5xl h-[5rem] md:h-[7rem] lg:h-[7rem] pt-4"
           >
@@ -25,7 +63,6 @@
           </p>
         </div>
 
-        <!-- Descriptive Text -->
         <p class="text-lg md:text-xl text-white font-normal lg:text-2xl">
           Shop as usual — Enjoy Surprise Perks along the way.
           <br class="hidden md:block" />
@@ -35,22 +72,22 @@
         </p>
         <div class="flex justify-start items-center gap-10">
           <NuxtLink
-          to="/signin"
+            v-show="!user"
+            to="/signin"
             class="text-2xl px-8 py-4 bg-yellow-400 text-[#333333] font-semibold rounded-full hover:bg-yellow-500 transition"
           >
             Join Now
           </NuxtLink>
 
-          <NuxtLink to="/business" 
-          class="text-2xl px-8 py-4 bg-blue-400 text-[#333333] font-semibold rounded-full hover:bg-blue-500 transition"
+          <NuxtLink
+            to="/business"
+            class="text-2xl px-8 py-4 bg-blue-400 text-[#333333] font-semibold rounded-full hover:bg-blue-500 transition"
           >
             Business
           </NuxtLink>
-         
         </div>
       </section>
 
-      <!-- Image Section -->
       <div class="h-full">
         <NuxtImg
           src="https://images.pexels.com/photos/3907306/pexels-photo-3907306.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
@@ -110,11 +147,6 @@
               unlock exclusive rewards. One quick scan connects you to surprise
               perks and exclusive deals.
             </p>
-            <!-- <div
-              class="w-fit mt-8 p-4 border border-[#B77B57] rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-transform duration-500"
-            >
-              <h3 class="font-semibold">📱 Scan</h3>
-            </div> -->
           </div>
           <div class="md:flex-1 w-full">
             <div class="md:flex-1 w-full">
@@ -143,11 +175,6 @@
               shopping experience. Your loyalty earns you unexpected rewards
               every time.
             </p>
-            <!-- <div
-              class="mt-8 p-4 border border-[#B77B57] rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-transform duration-500 w-fit"
-            >
-              <h3 class="font-semibold">🎁 Get Perks</h3>
-            </div> -->
           </div>
           <div class="md:flex-1 w-full">
             <div
@@ -174,11 +201,6 @@
               rewards flowing. Continue your journey, unlocking more perks as
               you go.
             </p>
-            <!-- <div
-              class="w-fit mt-8 p-4 border border-[#B77B57] rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-transform duration-500"
-            >
-              <h3 class="font-semibold">🔄 Repeat</h3>
-            </div> -->
           </div>
           <div class="md:flex-1 w-full">
             <div
@@ -193,6 +215,7 @@
     </div>
 
     <section
+      v-show="!user"
       class="py-16 bg-black text-white text-center w-full justify-center items-center"
     >
       <h2 class="text-4xl font-bold mb-6">Ready to Unlock Your Perks?</h2>
@@ -205,53 +228,3 @@
     <Footer />
   </div>
 </template>
-
-<script setup>
-import { ref, onMounted } from "vue";
-import { Button } from "@/components/ui/button";
-import {
-  TagsInput,
-  TagsInputInput,
-  TagsInputItem,
-  TagsInputItemDelete,
-  TagsInputItemText,
-} from "@/components/ui/tags-input";
-
-const modelValue = ref(["Champions Barbershop", "Upper Left Coffeeshop"]);
-const name = ref("");
-const email = ref("");
-const successMessage = ref("");
-const showTagline = ref(false);
-const businesses = [
-  "Nossa Familia Coffee-Portland",
-  "Zen Gym",
-  "Green Spa",
-  "Honey Latte Cafe",
-  "Book Haven",
-  "Above ground Coffee",
-];
-const typedText = ref("");
-let isTyping = false;
-
-const typeText = async (text) => {
-  if (isTyping) return;
-  isTyping = true;
-  typedText.value = "";
-  for (let i = 0; i < text.length; i++) {
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    typedText.value += text[i];
-  }
-  isTyping = false;
-};
-
-onMounted(() => {
-  showTagline.value = true;
-  let i = 0;
-  const switchText = () => {
-    typeText(businesses[i % businesses.length]);
-    i++;
-  };
-  switchText();
-  setInterval(switchText, 4000);
-});
-</script>

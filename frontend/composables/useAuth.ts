@@ -36,7 +36,6 @@ export const useAuthS = () => {
     return data;
   }
 
-  // Step 3: Complete Registration (Set Password)
   async function completeUserRegistration({
     email,
     password,
@@ -53,7 +52,6 @@ export const useAuthS = () => {
     return UserSchema.parse(data);
   }
 
-  // Register User Mutation Logic
   const { mutate: sendCodeMutate } = useMutation({
     mutationFn: sendVerificationCode,
   });
@@ -92,7 +90,6 @@ export const useAuthS = () => {
     });
   }
 
-  // Handle Email Verification Code Submission
   async function verifyCode(email: string, code: string) {
     verifyCodeMutate(
       { email, code },
@@ -107,7 +104,6 @@ export const useAuthS = () => {
     );
   }
 
-  // Handle Completing Registration by Setting Password
   async function completeRegistration(email: string, password: string) {
     completeRegistrationMutate(
       { email, password },
@@ -123,15 +119,11 @@ export const useAuthS = () => {
   }
 
   async function handleLogin(loginArgs: z.infer<typeof UserLoginSchema>) {
-    console.log("in the handlelogin");
-
     const data = await $fetch(`/account/login/`, {
       method: "POST",
       body: loginArgs,
       baseURL: "http://localhost:8000",
     });
-
-    console.log("response", data);
 
     return UserSchemaLogin.parse(data);
   }
@@ -161,7 +153,7 @@ export const useAuthS = () => {
           } else {
             navigateTo(
               {
-                path: "/business",
+                path: "/business/dashboard",
               },
               { replace: true }
             );
@@ -169,7 +161,7 @@ export const useAuthS = () => {
         } else {
           navigateTo(
             {
-              path: "/customer",
+              path: "/customer/",
             },
             {
               replace: true,
@@ -217,18 +209,10 @@ export const useAuthS = () => {
   }
 
   function getToken() {
-    // const cookie = getCookie("cookie");
-    // const cookies = useRequestHeaders(["cookie"]).cookie;
     const match = document.cookie.match(
       new RegExp("(^| )" + "auth_token" + "=([^;]+)")
     );
 
-    // if (match) {
-    //   match[2];
-    // } else {
-    //   console.log("No auth_token cookie found");
-    //   return navigateTo("/signin");
-    // }
     if (!match) {
       return navigateTo("/signin");
     }
@@ -263,16 +247,16 @@ export const useAuthS = () => {
   }
 
   async function handleCheckAuth() {
-    let token = null;
+    let token: string | null = null;
 
     if (import.meta.server) {
       const cookies = useRequestHeaders(["cookie"]).cookie;
       const match = cookies?.match(/auth_token=([^;]+)/);
-      token = match?.[1];
+      token = match?.[1] ?? null;
     }
 
     if (import.meta.client) {
-      token = useCookie("auth_token").value;
+      token = useCookie("auth_token").value ?? null;
     }
 
     if (token) {

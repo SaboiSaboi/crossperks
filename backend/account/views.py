@@ -543,16 +543,11 @@ class BusinessOnboardingView(generics.UpdateAPIView):
    
     def update(self, request, *args, **kwargs):
         business_profile = self.get_object()
-        print("all is well", business_profile)
         serializer = self.serializer_class(
             business_profile, data=request.data, partial=True
         )
-        print("done with serialize", serializer)
         serializer.is_valid(raise_exception=True)
-        print("finna print now")
         serializer.save()
-        
-        print("done saving")
 
         user = request.user
         user.is_onboarded = True
@@ -567,11 +562,9 @@ class UserPerkView(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        # print("finna get perk")
         perk = get_object_or_404(
             Perk, business__user=user, is_active=True
-        )  # Fetch only active perk
-        print("the user is ", perk)
+        ) 
         serializer = self.get_serializer(perk)
         return Response({"perk": serializer.data})
 

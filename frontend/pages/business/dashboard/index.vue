@@ -76,7 +76,7 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-gray-50 text-gray-900">
-    <HeaderSignedIn />
+    <section class="bg-gray-950"><HeaderDashboard /></section>
     <ClientOnly>
       <div
         class="shadow-md p-6 md:p-10 flex flex-col md:flex-row justify-center items-center"
@@ -238,14 +238,20 @@ onMounted(async () => {
         <span v-show="!perkStore.isLoading && !perkStore.perk">
           <div class="flex flex-col items-center justify-center py-20">
             <h2 class="text-2xl font-bold text-gray-800">No Active Campaign</h2>
-            <p class="text-gray-600 mt-2 text-lg">
-              A campaign is a [blank]. Create one to start sending and receiving referrals.
+            <p
+              class="text-gray-600 mt-6 text-lg text-center text-balance max-w-2xl flex flex-col justify-center items-center"
+            >
+              A campaign is a promotion that rewards customers and drives
+              engagement. Create one to start receiving customers!
             </p>
             <CampaignModal />
           </div>
         </span>
+        <hr />
         <div class="mt-10">
-          <h2 class="text-2xl font-extrabold text-gray-800">Past Campaigns</h2>
+          <h2 class="text-2xl font-extrabold text-gray-800 flex justify-center">
+            Past Campaigns
+          </h2>
 
           <!-- ✅ Show a loading indicator while past perks are loading -->
           <div v-if="perkStore.isLoading" class="flex justify-center py-5">
