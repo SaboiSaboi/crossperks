@@ -15,6 +15,7 @@ from .models import (
 )
 from .serializers import (
     BusinessProfileSerializer,
+    CustomerProfileSerializer,
     PerkSerializer,
 )
 from rest_framework.generics import ListAPIView
@@ -93,94 +94,21 @@ class VerifyCodeView(APIView):
                 {"error": "User not found."}, status=status.HTTP_404_NOT_FOUND
             )
 
+class UpdateNameView(APIView):
+    permission_classes = [IsAuthenticated]
 
-# class CompleteRegistrationView(generics.CreateAPIView):
-#     """Completes registration after email verification"""
+    def put(self, request):
+        user = request.user
+        raw_name = request.data.get("name")
 
-#     permission_classes = [AllowAny]
+        if not raw_name:
+            return Response({"error": "Name is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-#     def post(self, request, *args, **kwargs):
-#         email = request.data.get("email")
-#         password = request.data.get("password")
+        normalized_name = " ".join(word.capitalize() for word in raw_name.strip().split())
 
-#         try:
-#             user = CustomUser.objects.get(email=email, is_verified=True)
-
-#             if user.user_type == "customer":
-#                 cus_name = request.data.get("name")
-#                 if not cus_name:
-#                     return Response(
-#                         {"error": "Name is required for customers."},
-#                         status=status.HTTP_400_BAD_REQUEST,
-#                     )
-
-#                 user.name = cus_name
-#                 user.set_password(password)
-#                 user.save()
-
-#                 CustomerProfile.objects.get_or_create(user=user)
-
-#                 return Response(
-#                     {"message": "Registration complete!"}, status=status.HTTP_200_OK
-#                 )
-
-#             print("putting together business")
-
-#             if user.user_type == "business":
-#                 business_name = request.data.get("officialName")
-#                 claim_token = request.data.get("claim_token")
-
-#                 if not business_name or not claim_token:
-#                     return Response(
-#                         {"error": "Business name and claim token are required."},
-#                         status=status.HTTP_400_BAD_REQUEST,
-#                     )
-
-#                 business = get_object_or_404(
-#                     BusinessProfile, claim_token=claim_token, is_claimed=False
-#                 )
-
-#                 user.name = business_name
-#                 user.set_password(password)
-#                 user.save()
-
-#                 business.user = user
-#                 business.is_claimed = True
-#                 business.official_name = business_name
-#                 print("we are about to make code")
-#                 business.generate_qr_code()
-#                 print("we are done making code")
-
-#                 business.save()
-#                 # now gonna sign them in
-#                 print("user logging in is", user)
-#                 if user is None:
-#                     return Response({"error": "Invalid email or password."}, status=400)
-
-#                 _, token = AuthToken.objects.create(user)
-
-#                 response_data = {
-#                     "message": "Login successful",
-#                     "user": {
-#                         "id": user.id,
-#                         "email": user.email,
-#                         "name": user.name,
-#                         "user_type": user.user_type,
-#                     },
-#                     "auth_token": token,
-#                 }
-
-#                 return Response(
-#                     response_data,
-#                     status=status.HTTP_200_OK,
-#                 )
-
-#         except CustomUser.DoesNotExist:
-#             return Response(
-#                 {"error": "Email not verified or user not found."},
-#                 status=status.HTTP_404_NOT_FOUND,
-#             )
-
+        user.name = normalized_name
+        user.save()
+        return Response({"message": "Name updated successfully.", "name": normalized_name}, status=status.HTTP_200_OK)
 
 class CompleteRegistrationView(generics.CreateAPIView):
     permission_classes = [AllowAny]
@@ -236,7 +164,6 @@ class CompleteRegistrationView(generics.CreateAPIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Generate login token (for both customer and business)
             _, token = AuthToken.objects.create(user)
 
             response_data = {
@@ -303,36 +230,6 @@ class SendClaimEmailView(APIView):
         )
 
 
-# class ClaimBusinessView(APIView):
-#     """Allows a business owner to claim a business"""
-
-#     def post(self, request):
-#         claim_token = request.data.get("claim_token")
-#         email = request.data.get("email")
-#         password = request.data.get("password")
-
-#         business = get_object_or_404(
-#             BusinessProfile, claim_token=claim_token, is_claimed=False
-#         )
-
-#         # Create user
-#         user = CustomUser.objects.create_user(
-#             email=email,
-#             name=business.official_name,
-#             user_type="business",
-#             password=password,
-#         )
-#         business.user = user
-#         business.is_claimed = True
-#         business.save()
-
-#         return Response(
-#             {"message": "Business claimed successfully! You can now log in."},
-#             status=status.HTTP_200_OK,
-#         )
-
-
-### **1️⃣ API: List All Unclaimed Businesses (Optional)**
 class BusinessListView(generics.ListAPIView):
     """
     Returns a list of unclaimed businesses.
@@ -341,16 +238,15 @@ class BusinessListView(generics.ListAPIView):
 
     queryset = BusinessProfile.objects.filter(is_claimed=False)
     serializer_class = BusinessProfileSerializer
-    permission_classes = [AllowAny]  # Change this if only admins should access it
+    permission_classes = [AllowAny]
 
 
-### **2️⃣ API: Fetch Business Details by Claim Token**
 class BusinessDetailView(APIView):
     """
     Fetches a specific business's details using the claim token.
     """
 
-    permission_classes = [AllowAny]  # Anyone with a claim link should access this
+    permission_classes = [AllowAny] 
 
     def get(self, request, claim_token):
 
@@ -390,12 +286,10 @@ class ClaimBusinessView(APIView):
             BusinessProfile, claim_token=claim_token, is_claimed=False
         )
 
-        # Create business owner account
         user = CustomUser.objects.create_user(
             email=email, name=official_name, user_type="business", password=password
         )
 
-        # Update business profile with details
         business.user = user
         business.official_name = official_name
         business.street_address = street_address
@@ -404,7 +298,6 @@ class ClaimBusinessView(APIView):
         business.zip_code = zip_code
         business.is_claimed = True
 
-        # Generate QR Code
         business.generate_qr_code()
         business.save()
 
@@ -429,8 +322,6 @@ class LoginView(APIView):
             return Response({"error": "Email and password are required."}, status=400)
 
         user = authenticate(request, username=email, password=password)
-        # print("user logging in is", user)
-        # print("request used is ", request)
         if user is None:
             return Response({"error": "Invalid email or password."}, status=400)
 
@@ -479,7 +370,6 @@ class GetUserAPIView(APIView):
             "auth_token": token,
         }
 
-        # Fetch Business or Customer Profile
         if role == "business":
             business = getattr(user, "business_profile", None)
             if business:
@@ -508,6 +398,9 @@ class GetUserAPIView(APIView):
                     "previous_perks": PerkSerializer(
                         customer.previous_perks.all(), many=True
                     ).data,
+                    "preferred_identifiers": [
+                identifier.name for identifier in customer.preferred_identifiers.all()
+            ],
                 }
 
         return Response(response_data, status=status.HTTP_200_OK)
@@ -527,12 +420,26 @@ class CreatePerkView(CreateAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # print("Hey there, you finna create a perk")
 
         business = user.business_profile
         serializer.save(business=business)
 
+class CustomerOnboardingView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def put(self, request, *args, **kwargs):
+        """Allow customers to set preferred identifiers."""
+        customer_profile, created = CustomerProfile.objects.get_or_create(user=request.user)
+        serializer = CustomerProfileSerializer(customer_profile, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            request.user.is_onboarded = True  
+            request.user.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 class BusinessOnboardingView(generics.UpdateAPIView):
 
     serializer_class = BusinessProfileSerializer

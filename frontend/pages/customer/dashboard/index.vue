@@ -1,6 +1,44 @@
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+
+const { handleCheckAuth } = useAuthS();
+
+const userName = ref("");
+const currentPerk = ref<any | null>(null);
+const recentPerks = ref<any>([]);
+
+const userData: any = await handleCheckAuth();
+userName.value = userData.user.name || "User";
+
+const fetchPerks = async () => {
+  try {
+    const response: any = await $fetch(
+      "http://localhost:8000/customer/perks/",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Token ${getToken()}`,
+        },
+      }
+    );
+
+    currentPerk.value = response.current_perk;
+    recentPerks.value = response.recent_perks;
+  } catch (error) {
+    console.error("Failed to fetch perks:", error);
+  }
+};
+
+const getToken = () => {
+  const match = document.cookie.match(new RegExp("(^| )auth_token=([^;]+)"));
+  return match ? match[2] : null;
+};
+
+onMounted(fetchPerks);
+</script>
 <template>
   <div>
-    <HeaderSignedIn />
+    <div class="bg-gray-950"><HeaderDashboard /></div>
     <div
       class="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-10"
     >
@@ -8,7 +46,9 @@
       <h2 class="text-4xl font-bold mb-6 text-slate-900">
         Welcome, {{ userName }} 🎉
       </h2>
-      <p class="text-lg text-gray-600 mb-10">Here is your surprise perk.</p>
+      <p v-if="currentPerk" class="text-lg text-gray-600 mb-10">
+        Here is your surprise perk.
+      </p>
 
       <!-- Current Perk Section -->
       <div
@@ -47,7 +87,11 @@
       <div
         class="w-full max-w-lg mt-10 bg-white p-8 rounded-2xl shadow-lg border border-gray-200"
       >
-        <h3 class="text-2xl font-semibold mb-4 text-slate-900">Recent Perks</h3>
+        <h3
+          class="text-2xl font-semibold mb-4 text-slate-900 flex justify-center"
+        >
+          Recent Perks
+        </h3>
         <ul v-if="recentPerks.length" class="divide-y divide-gray-200">
           <li v-for="perk in recentPerks" :key="perk.id" class="py-3">
             <p class="text-lg font-medium text-slate-700">
@@ -56,48 +100,13 @@
             </p>
           </li>
         </ul>
-        <p v-else class="text-gray-500">No recent perks yet.</p>
+        <p v-else class="text-gray-500 flex justify-center">
+          No recent perks yet.
+        </p>
       </div>
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref, onMounted } from "vue";
-
-const { handleCheckAuth } = useAuthS();
-
-const userName = ref(""); // Placeholder, should be fetched dynamically
-const currentPerk = ref(null);
-const recentPerks = ref([]);
-
-const userData = await handleCheckAuth();
-console.log(userData.user.name);
-userName.value = userData.user.name || "User"; // Fetch user's name dynamically
-
-const fetchPerks = async () => {
-  try {
-    const response = await $fetch("http://localhost:8000/customer/perks/", {
-      method: "GET",
-      headers: {
-        Authorization: `Token ${getToken()}`,
-      },
-    });
-
-    currentPerk.value = response.current_perk;
-    recentPerks.value = response.recent_perks;
-  } catch (error) {
-    console.error("Failed to fetch perks:", error);
-  }
-};
-
-const getToken = () => {
-  const match = document.cookie.match(new RegExp("(^| )auth_token=([^;]+)"));
-  return match ? match[2] : null;
-};
-
-onMounted(fetchPerks);
-</script>
 
 <style>
 html {

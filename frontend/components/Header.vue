@@ -108,7 +108,7 @@ const userType = user.value?.user?.user_type;
                 class="text-slate-200 hover:text-slate-50"
               >
                 <NavigationMenuLink
-                  :href="`${userType}/dashboard`"
+                  :href="`http://localhost:3000/${userType}/dashboard`"
                   class="hover:underline text-xl"
                 >
                   <p class="hover:underline text-xl">Dashboard</p>

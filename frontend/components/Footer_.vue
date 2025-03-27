@@ -39,14 +39,14 @@
             <li>
               <a
                 class="text-slate-200 hover:text-slate-200 transition duration-150 ease-in-out"
-                href="#0"
-                >Businesses</a
+                href="/business"
+                >Business</a
               >
             </li>
             <li>
               <a
                 class="text-slate-200 hover:text-slate-200 transition duration-150 ease-in-out"
-                href="#0"
+                href="/"
                 >Customers</a
               >
             </li>
