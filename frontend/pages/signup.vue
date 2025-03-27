@@ -231,6 +231,8 @@ const completeRegistration = async () => {
         },
       }
     );
+
+    // navigateTo("/")
     console.log("Registration complete:", response);
   } catch (error) {
     console.error("Failed to complete registration:", error);
