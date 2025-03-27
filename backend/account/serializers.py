@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BusinessIdentifier, BusinessProfile, CustomUser, Perk
+from .models import BusinessIdentifier, BusinessProfile, CustomUser, CustomerProfile, Perk
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -20,28 +20,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
-# class BusinessProfileSerializer(serializers.ModelSerializer):
-#     category = serializers.CharField(required=False, allow_blank=True)
-#     website = serializers.URLField(required=False, allow_blank=True)
-#     phone = serializers.CharField(required=False, allow_blank=True)
-#     identifiers = serializers.StringRelatedField(many=True)
-
-#     class Meta:
-#         model = BusinessProfile
-#         fields = [
-#             "official_name",
-#             "street_address",
-#             "city",
-#             "state",
-#             "zip_code",
-#             "category",
-#             "website",
-#             "phone",
-#             "logo",
-#             "identifiers",
-#         ]
-
-#         read_only_fields = ["is_claimed", "claim_token", "qr_code"]
 class BusinessProfileSerializer(serializers.ModelSerializer):
     category = serializers.CharField(required=False, allow_blank=True)
     website = serializers.URLField(required=False, allow_blank=True)
@@ -92,3 +70,18 @@ class PerkSerializer(serializers.ModelSerializer):
             "ended_at",
         ]
         read_only_fields = ["id", "business", "created_at"]
+
+class CustomerProfileSerializer(serializers.ModelSerializer):
+    preferred_identifiers = serializers.PrimaryKeyRelatedField(
+        queryset=BusinessIdentifier.objects.all(), many=True, required=False
+    )
+
+    class Meta:
+        model = CustomerProfile
+        fields = ["preferred_identifiers"]
+
+    def to_representation(self, instance):
+        """Return identifier names instead of IDs."""
+        data = super().to_representation(instance)
+        data["preferred_identifiers"] = [identifier.name for identifier in instance.preferred_identifiers.all()]
+        return data

@@ -271,6 +271,8 @@ class CustomerProfile(models.Model):
     previous_perks = models.ManyToManyField(
         "Perk", related_name="previous_perks", blank=True
     )
+    
+    preferred_identifiers = models.ManyToManyField("BusinessIdentifier", blank=True)
 
     def __str__(self):
         return f"Profile for {self.user.name}"

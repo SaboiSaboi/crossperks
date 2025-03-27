@@ -2,15 +2,16 @@ from django.urls import path
 from .views import (
     BusinessDetailView,
     BusinessIdentifierListView,
-    BusinessListView,
     BusinessOnboardingView,
     BusinessProfileListView,
     ClaimBusinessView,
     CreatePerkView,
+    CustomerOnboardingView,
     EndCampaignView,
     GetUserAPIView,
     LoginView,
     SendVerificationCodeView,
+    UpdateNameView,
     UserPerkView,
     UserPerksView,
     VerifyCodeView,
@@ -28,7 +29,6 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path("user/", GetUserAPIView.as_view(), name="get-user"),
     path("create-perk/", CreatePerkView.as_view(), name="create-perk"),
-    # path("businesses/", BusinessListView.as_view(), name="business-list"),
     path(
         "business/<uuid:claim_token>/",
         BusinessDetailView.as_view(),
@@ -42,9 +42,11 @@ urlpatterns = [
     ),
     path("perk/", UserPerkView.as_view(), name="get-a-perk"),
     path("onboarding/", BusinessOnboardingView.as_view(), name="onboarding-user"),
+    path("customer-onboarding/", CustomerOnboardingView.as_view(), name="onboarding-user"),
     path(
         "perks/<int:campaign_id>/end/", EndCampaignView.as_view(), name="end_campaign"
     ),
     path("businesses/", BusinessProfileListView.as_view(), name="business-list"),
     path("identifiers/", BusinessIdentifierListView.as_view(), name="identifier-list"),
+     path("update-name/", UpdateNameView.as_view(), name="update-name"),
 ]
