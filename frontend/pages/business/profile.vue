@@ -1,6 +1,6 @@
 <template>
   <div>
-    <HeaderSignedIn />
+    <div class="bg-gray-950"><Header /></div>
     <div
       class="max-w-2xl mx-auto py-10 h-screen flex flex-col gap-10 items-center"
     >
