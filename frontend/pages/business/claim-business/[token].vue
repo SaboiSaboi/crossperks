@@ -86,8 +86,6 @@ const completeRegistration = async () => {
     return;
   }
 
-  console.log("finna complete");
-
   try {
     const response = await $fetch(
       "http://localhost:8000/account/complete-registration/",
@@ -137,13 +135,15 @@ const handleSubmit = async () => {
       class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg"
     >
       <form @submit.prevent="handleSubmit" class="flex flex-col">
-        <Label class="block mb-2 font-medium">Business Email</Label>
-        <input
+        <Label class="block mb-2 font-medium" for="email">Business Email</Label>
+        <Input
+          id="email"
           v-model="email"
           type="text"
           placeholder="Business Email"
           required
           class="w-full p-3 mb-4 border rounded-lg"
+          :disabled="emailSent || isVerified"
         />
 
         <button
@@ -161,12 +161,15 @@ const handleSubmit = async () => {
           Send Verification Code
         </button>
         <div v-if="emailSent && !isVerified">
-          <label class="block mb-2 font-medium">Enter Verification Code</label>
-          <input
+          <Label for="verificationCode" class="block mb-2 font-medium"
+            >Enter Verification Code</Label
+          >
+          <Input
             type="text"
             placeholder="Verification Code"
             class="w-full p-3 mb-4 border rounded-lg"
             v-model="verificationCode"
+            id="verificationCode"
           />
           <button
             type="button"
@@ -183,24 +186,33 @@ const handleSubmit = async () => {
           </button>
         </div>
         <div v-if="isVerified">
-          <Label class="block mb-2 font-medium">Business Name</Label>
-          <input
+          <Label for="officialName" class="block mb-2 font-medium"
+            >Business Name</Label
+          >
+          <Input
+            id="officialName"
             v-model="officialName"
             type="text"
             placeholder="Business Name"
             required
             class="w-full p-3 mb-4 border rounded-lg"
           />
-          <Label class="block mb-2 font-medium">Password</Label>
-          <input
+          <Label for="userPassword" class="block mb-2 font-medium"
+            >Password</Label
+          >
+          <Input
+            id="userPassword"
             type="password"
             placeholder="Password"
             class="w-full p-3 mb-4 border rounded-lg"
             v-model="userPassword"
           />
 
-          <Label class="block mb-2 font-medium">Confirm Password</Label>
-          <input
+          <Label for="confirmPassword" class="block mb-2 font-medium"
+            >Confirm Password</Label
+          >
+          <Input
+            id="confirmPassword"
             type="password"
             placeholder="Confirm Password"
             class="w-full p-3 mb-4 border rounded-lg"
@@ -230,8 +242,6 @@ const handleSubmit = async () => {
           </p>
         </div>
       </form>
-      <!-- <p v-if="successMessage" class="text-green-600">{{ successMessage }}</p> -->
-      <!-- <p v-if="errorMessage" class="text-red-600">{{ errorMessage }}</p> -->
       <div class="text-center mt-4">
         <p class="text-sm">
           Already have an account?
