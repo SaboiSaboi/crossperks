@@ -57,10 +57,8 @@ const sendVerificationCode = async () => {
   }
 };
 
-// Fetch business data
 const { data: business, error } = await useAsyncData("business", async () => {
   try {
-    // console.log("in the ");
     const businessData = await $fetch(
       `http://localhost:8000/account/business/${claimToken}/`
     );
@@ -68,7 +66,6 @@ const { data: business, error } = await useAsyncData("business", async () => {
       claimed.value = true;
       return null;
     }
-    // console.log("this is the bus", businessData);
     return businessData;
   } catch (err) {
     console.error("Error fetching business data:", err);
@@ -77,7 +74,6 @@ const { data: business, error } = await useAsyncData("business", async () => {
   }
 });
 
-// Watch for changes in business data and update officialName when available
 watchEffect(() => {
   if (business.value && !claimed.value) {
     officialName.value = business.value.official_name || "";
@@ -85,7 +81,6 @@ watchEffect(() => {
 });
 
 const completeRegistration = async () => {
-  // console.log("in the complete reg");
   if (userPassword.value !== confirmPassword.value) {
     alert("Passwords do not match.");
     return;
@@ -114,44 +109,16 @@ const completeRegistration = async () => {
     const token = useCookie("auth_token");
     token.value = response.auth_token;
 
-    // Middleware handles onboarding redirect
     navigateTo(`/${userType}`, { replace: true });
   } catch (error) {
     console.error("Failed to complete registration:", error);
   }
 };
 
-// const claimBusiness = async () => {
-//   try {
-//     successMessage.value = null;
-//     errorMessage.value = null;
-
-//     await $fetch("http://localhost:8000/account/claim-business/", {
-//       method: "POST",
-//       body: {
-//         claim_token: claimToken,
-//         official_name: officialName.value,
-//         email: email.value,
-//         password: userPassword.value,
-//       },
-//     });
-
-//     successMessage.value = "Business successfully claimed! Redirecting...";
-//     setTimeout(() => {
-//       router.push("/business/dashboard");
-//     }, 2000);
-//   } catch (error) {
-//     console.error("Error claiming business:", error);
-//     errorMessage.value =
-//       error?.message || "Failed to claim business. Try again.";
-//   }
-// };
-
 const handleSubmit = async () => {
   console.log("user verfified ", isVerified.value);
   if (isVerified.value) {
     await completeRegistration();
-    // await claimBusiness();
   }
 };
 </script>
@@ -275,7 +242,6 @@ const handleSubmit = async () => {
       </div>
     </div>
 
-    <!-- Display message if business is already claimed -->
     <div
       v-if="claimed || errorMessage"
       class="flex justify-center items-center max-w-md w-full h-[19.8rem] text-xl text-center"
@@ -283,7 +249,6 @@ const handleSubmit = async () => {
       No businesses found. Need help? Contact us at support@crossperks.com.
     </div>
 
-    <!-- Display fallback if no business data is available -->
     <div
       v-else-if="!business"
       class="flex justify-center items-center max-w-md w-full h-[19.8rem]"
