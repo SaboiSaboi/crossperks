@@ -44,6 +44,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const userType = res.user.user_type;
     const isOnboarded = res.user.is_onboarded;
 
+    if (to.path === "/customer" || to.path === "/customer/") {
+      return navigateTo("/customer/dashboard");
+    }
+
     // ❌ Block signed-in users from accessing auth pages (redirect them to their dashboard)
     if (isAuthRoute) {
       return navigateTo(`/${userType}`);
