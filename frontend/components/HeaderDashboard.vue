@@ -93,6 +93,17 @@ const user: any = await handleCheckAuth();
                   <p class="hover:underline text-xl">Dashboard button</p>
                 </NavigationMenuLink>
               </NavigationMenuItem> -->
+              <NavigationMenuItem
+                class="text-slate-200 hover:text-slate-50"
+                v-show="user"
+              >
+                <NavigationMenuLink
+                  href="http://localhost:3000/customer/profile"
+                  class="hover:underline text-xl"
+                >
+                  <p class="hover:underline text-xl">Profile</p>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
               <NavigationMenuItem class="text-slate-200 hover:text-slate-50">
                 <NavigationMenuLink
                   href="/businesses"
@@ -109,6 +120,7 @@ const user: any = await handleCheckAuth();
                   <p class="hover:underline text-xl">Business</p>
                 </NavigationMenuLink>
               </NavigationMenuItem>
+
               <NavigationMenuItem
                 class="text-slate-200 hover:text-slate-50"
                 v-show="user"
