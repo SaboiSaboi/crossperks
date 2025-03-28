@@ -64,7 +64,6 @@ const updatePreferences = async () => {
       },
     });
 
-    // Update local state
     preferredIdentifiers.value = allIdentifiers.value
       .filter((id) => selectedIdentifiers.value.includes(id.id))
       .map((id) => id.name);

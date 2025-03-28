@@ -84,7 +84,9 @@ const completeOnboarding = async () => {
   <div
     class="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8"
   >
-    <Card class="w-full max-w-lg shadow-lg">
+    <NuxtLink to="/" class="text-3xl font-bold mb-6">CrossPerks</NuxtLink>
+
+    <Card class="w-full max-w-lg shadow-lg overflow-y-auto h-[80dvh]">
       <CardHeader>
         <CardTitle class="text-2xl text-center"
           >Welcome to CrossPerks!</CardTitle
@@ -97,33 +99,42 @@ const completeOnboarding = async () => {
       <CardContent>
         <form @submit.prevent="completeOnboarding" class="space-y-4">
           <div>
-            <Label>Business Name</Label>
-            <Input v-model="business.official_name" required />
+            <Label for="official_name">Business Name</Label>
+            <Input
+              id="official_name"
+              v-model="business.official_name"
+              required
+            />
           </div>
 
           <div>
-            <Label>Street Address</Label>
-            <Input v-model="business.street_address" required />
+            <Label for="streetAddress">Street Address</Label>
+            <Input
+              id="streetAddress"
+              v-model="business.street_address"
+              required
+            />
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <Label>City</Label>
-              <Input v-model="business.city" required />
+              <Label for="city">City</Label>
+              <Input id="city" v-model="business.city" required />
             </div>
             <div>
-              <Label>State</Label>
-              <Input v-model="business.state" required />
+              <Label for="state">State</Label>
+              <Input id="state" v-model="business.state" required />
             </div>
             <div>
-              <Label>Zip Code</Label>
-              <Input v-model="business.zip_code" required />
+              <Label for="zipCode">Zip Code</Label>
+              <Input id="zipCode" v-model="business.zip_code" required />
             </div>
           </div>
 
           <div>
-            <Label>Business Category</Label>
+            <Label for="category">Business Category</Label>
             <Input
+              id="category"
               v-model="business.category"
               placeholder="e.g. Cafe, Retail, Salon"
               required
@@ -131,13 +142,19 @@ const completeOnboarding = async () => {
           </div>
 
           <div>
-            <Label>Website URL</Label>
-            <Input v-model="business.website" type="url" required />
+            <Label for="website">Website URL</Label>
+            <Input
+              id="website"
+              v-model="business.website"
+              type="url"
+              required
+            />
           </div>
 
           <div>
-            <Label>Contact Phone Number (Optional)</Label>
+            <Label for="phone">Contact Phone Number (Optional)</Label>
             <Input
+              id="phone"
               v-model="business.phone"
               type="tel"
               placeholder="123-456-7890"

@@ -8,10 +8,10 @@ const BusinessSchema = z.object({
   identifiers: z.array(z.string()),
   logo: z.string().nullable(),
   official_name: z.string(),
-  phone: z.string(),
+  phone: z.string().nullable(),
   state: z.string(),
   street_address: z.string(),
-  website: z.string().url(),
+  website: z.string().url().nullable(),
   zip_code: z.string(),
 });
 
@@ -23,7 +23,8 @@ const error = ref<string | null>(null);
 
 const fetchBusinesses = async () => {
   try {
-    const response = await $fetch("http://127.0.0.1:8000/account/businesses/");
+    const response = await $fetch("http://localhost:8000/account/businesses/");
+    // console.log(response);
     const parsedResponse = z.array(BusinessSchema).safeParse(response);
 
     if (!parsedResponse.success) {
