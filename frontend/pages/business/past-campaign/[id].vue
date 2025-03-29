@@ -1,7 +1,9 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <HeaderSignedIn />
-    <div class="h-dvh flex justify-center items-center px-4">
+    <section class="bg-gray-950"><HeaderPastCampaign /></section>
+    <div
+      class="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 my-16"
+    >
       <div
         class="container mx-auto max-w-3xl bg-white p-6 rounded-lg shadow-md border border-gray-300"
       >
@@ -131,6 +133,6 @@ const recreateCampaign = () => {
 
 // ✅ Go Back
 const goBack = () => {
-  router.push("/business");
+  router.push("/business/dashboard");
 };
 </script>
