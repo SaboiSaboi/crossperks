@@ -45,12 +45,10 @@ const endCampaign = async () => {
       },
     });
 
-    console.log("Campaign successfully ended.");
-
     perkStore.clearPerk();
     await perkStore.loadPastPerksFromDB();
 
-    router.push("/business");
+    router.push("/business/dashboard");
   } catch (error) {
     console.error("Failed to end campaign:", error);
   }
