@@ -126,8 +126,8 @@ const isActive = (path: string) => route.path === path;
           </router-link>
         </div>
 
-        <nav class="hidden sm:flex sm:grow sm:justify-end bg-blue-800 w-fit">
-          <NavigationMenu>
+        <nav class="hidden sm:flex sm:grow sm:justify-end">
+          <NavigationMenu class="w-full flex justify-end">
             <NavigationMenuList class="flex gap-7">
               <NavigationMenuItem
                 v-for="link in navLinks"
@@ -136,7 +136,7 @@ const isActive = (path: string) => route.path === path;
               >
                 <NavigationMenuLink
                   :href="link.path"
-                  class="text-xl transition-colors flex items-center gap-2"
+                  class="text-xl transition-colors flex items-center"
                   :class="
                     isActive(link.path)
                       ? 'text-slate-50 underline font-semibold'
