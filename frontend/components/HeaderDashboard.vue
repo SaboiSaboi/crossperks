@@ -1,9 +1,61 @@
 <script setup lang="ts">
+import { computed, ref } from "vue";
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+import { useRoute } from "vue-router";
 
+// Initialize router and auth state
+const route = useRoute();
 const { handleCheckAuth, logout } = useAuthS();
-const user: any = await handleCheckAuth();
-const userType = user.user.user_type;
+
+// Properly declare reactive refs
+const user = ref<any>(null);
+const userType = ref<string>("");
+
+// Ensure async data fetching on component mount
+user.value = await handleCheckAuth();
+userType.value = user.value?.user?.user_type || "";
+
+// Navigation Links
+const navLinks = computed(() => [
+  {
+    name: "Dashboard",
+    path: `/${userType.value}/dashboard`,
+    show: !!user.value,
+  },
+  {
+    name: "Businesses",
+    path: "/businesses",
+    show: true,
+  },
+  {
+    name: "Business",
+    path: "/business",
+    show: true,
+  },
+  {
+    name: "Profile",
+    path:
+      userType.value === "customer"
+        ? "/customer/profile"
+        : userType.value === "business"
+        ? "/business/profile"
+        : "#",
+    show: !!user.value,
+  },
+  {
+    name: "Sign In",
+    path: "/signin",
+    show: !user.value,
+  },
+  {
+    name: "Join Now",
+    path: "/signup",
+    show: !user.value,
+  },
+]);
+
+// Highlight active link based on current route
+const isActive = (path: string) => route.path === path;
 </script>
 
 <template>
@@ -83,61 +135,30 @@ const userType = user.user.user_type;
         <nav class="hidden sm:flex sm:grow sm:justify-end">
           <NavigationMenu>
             <NavigationMenuList class="flex gap-7">
-              <!-- <NavigationMenuItem
-                v-show="user"
-                class="text-slate-200 hover:text-slate-50"
-              >
-                <NavigationMenuLink
-                  :href="`${user.user.user_type}/dashboard`"
-                  class="hover:underline text-xl"
-                >
-                  <p class="hover:underline text-xl">Dashboard button</p>
-                </NavigationMenuLink>
-              </NavigationMenuItem> -->
               <NavigationMenuItem
-                class="text-slate-200 hover:text-slate-50"
-                v-show="user"
+                v-for="link in navLinks"
+                :key="link.path"
+                v-show="link.show"
               >
                 <NavigationMenuLink
-                  :href="
-                    userType === 'customer'
-                      ? 'http://localhost:3000/customer/profile'
-                      : userType === 'business'
-                      ? 'http://localhost:3000/business/profile'
-                      : '#'
+                  :href="link.path"
+                  @click="link.name === 'Sign In' ? logout : null"
+                  class="text-xl transition-colors"
+                  :class="
+                    isActive(link.path)
+                      ? 'text-slate-50 underline font-semibold'
+                      : 'text-slate-200 hover:text-slate-50 hover:underline'
                   "
-                  class="hover:underline text-xl"
                 >
-                  <p class="hover:underline text-xl">Profile</p>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem class="text-slate-200 hover:text-slate-50">
-                <NavigationMenuLink
-                  href="/businesses"
-                  class="hover:underline text-xl"
-                >
-                  <p class="hover:underline text-xl">Businesses</p>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem class="text-slate-200 hover:text-slate-50">
-                <NavigationMenuLink
-                  href="/business"
-                  class="hover:underline text-xl"
-                >
-                  <p class="hover:underline text-xl">Business</p>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
+                  <span
+                    v-if="link.name !== 'Sign In' && link.name !== 'Join Now'"
+                  >
+                    {{ link.name }}
+                  </span>
 
-              <NavigationMenuItem
-                class="text-slate-200 hover:text-slate-50"
-                v-show="user"
-              >
-                <NavigationMenuLink
-                  href="/signin"
-                  @click="logout"
-                  class="hover:underline text-xl"
-                >
+                  <!-- Icon specifically for Sign In / Logout -->
                   <svg
+                    v-if="link.name === 'Sign In' && user"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -151,32 +172,18 @@ const userType = user.user.user_type;
                       d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
                     />
                   </svg>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem
-                class="text-slate-200 hover:text-slate-50"
-                v-show="!user"
-              >
-                <NavigationMenuLink
-                  href="/signin"
-                  class="hover:underline text-xl"
-                >
-                  Sign In
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem v-show="!user">
-                <NavigationMenuLink
-                  href="/signup"
-                  :class="navigationMenuTriggerStyle()"
-                  class="text-black text-xl bg-slate-200 hover:bg-slate-50 border-[1.5px] border-black px-4 py-2 rounded-full transition-all"
-                >
-                  Join Now
+
+                  <span
+                    v-if="link.name === 'Join Now'"
+                    class="text-black text-xl bg-slate-200 hover:bg-slate-50 border-[1.5px] border-black px-4 py-2 rounded-full transition-all"
+                  >
+                    {{ link.name }}
+                  </span>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </nav>
-
         <BurgerMenu />
         <div class="block sm:hidden">a menu</div>
       </div>

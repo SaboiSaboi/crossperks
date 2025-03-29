@@ -29,7 +29,7 @@ const features = [
   <div
     class="min-h-screen flex flex-col bg-black text-gray-100 font-sans w-full"
   >
-    <Header />
+    <HeaderDashboard />
 
     <section
       class="relative flex flex-col-reverse md:flex-row items-center justify-between px-6 md:px-10 py-24 md:py-32 max-w-7xl mx-auto animate-fade-in"

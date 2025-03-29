@@ -10,8 +10,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
     "/",
   ];
 
-  const onboardingRoutes = ["/customer/onboarding", "/business/onboarding"];
-
   const isAuthRoute = authRoutes.includes(to.path);
   const isPublicRoute =
     publicRoutes.includes(to.path) ||
@@ -48,12 +46,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
       return navigateTo("/customer/dashboard");
     }
 
-    // ❌ Block signed-in users from accessing auth pages (redirect them to their dashboard)
     if (isAuthRoute) {
       return navigateTo(`/${userType}`);
     }
 
-    // ✅ Allow access to public pages for signed-in users
     if (isPublicRoute) {
       return;
     }
