@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { z } from "zod";
-import HeaderDashboard from "~/components/Header.vue";
+import Header from "~/components/Header.vue";
 
 const BusinessSchema = z.object({
   category: z.string(),
