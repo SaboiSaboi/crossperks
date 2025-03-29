@@ -89,14 +89,14 @@ onMounted(async () => {
         </div>
       </div>
       <div
-        class="max-w-6xl mx-auto p-6 md:p-10 h-screen flex flex-col justify-center"
+        class="max-w-6xl mx-auto p-6 md:p-10 h-screen justify-center grid grid-col-2"
       >
-        <div
+        <!-- <div
           v-show="perkStore.isLoading"
           class="flex justify-center py-5 h-[20rem]"
         >
-          <p class="text-gray-500">Loading</p>
-        </div>
+          <p class="text-gray-500 bg-yellow-200 w-full">Loading....</p>
+        </div> -->
         <div
           class="grid grid-cols-1 md:grid-cols-3 gap-6 h-[19rem]"
           v-show="!perkStore.isLoading && perkStore.perk"
@@ -233,7 +233,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <span v-show="!perkStore.isLoading && !perkStore.perk">
+        <span v-if="!perkStore.isLoading && !perkStore.perk">
           <div class="flex flex-col items-center justify-center py-20">
             <h2 class="text-2xl font-bold text-gray-800">No Active Campaign</h2>
             <p
@@ -247,34 +247,34 @@ onMounted(async () => {
         </span>
         <hr />
         <div class="mt-10">
-          <h2 class="text-2xl font-extrabold text-gray-800 flex justify-center">
-            Past Campaigns
-          </h2>
-
-          <div v-if="perkStore.isLoading" class="flex justify-center py-5">
-            <p class="text-gray-500">Loading past campaigns...</p>
-          </div>
-
           <div
-            v-else-if="perkStore.pastPerks && perkStore.pastPerks.length > 0"
-            class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6"
+            v-if="perkStore.pastPerks && perkStore.pastPerks.length > 0"
+            class=""
           >
-            <div
-              v-for="past in perkStore.pastPerks"
-              :key="past.id"
-              @click="navigateToCampaign(past)"
-              class="bg-white p-6 rounded-lg shadow-lg border border-gray-200"
+            <h2
+              class="text-2xl font-extrabold text-gray-800 flex justify-center"
             >
-              <p class="text-lg font-bold text-gray-800">{{ past.title }}</p>
-              <p class="text-lg text-gray-800">{{ past.description }}</p>
-              <p class="text-lg text-gray-800">Total: {{ past.total }}</p>
-              <p class="text-gray-600">
-                Redemptions:
-                <span class="font-semibold">{{ past.redemptions }}</span>
-              </p>
-              <p class="text-gray-600">
-                Total Scans: <span class="font-semibold">{{ past.total }}</span>
-              </p>
+              Past Campaigns
+            </h2>
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div
+                v-for="past in perkStore.pastPerks"
+                :key="past.id"
+                @click="navigateToCampaign(past)"
+                class="bg-white p-6 rounded-lg shadow-lg border border-gray-200"
+              >
+                <p class="text-lg font-bold text-gray-800">{{ past.title }}</p>
+                <p class="text-lg text-gray-800">{{ past.description }}</p>
+                <p class="text-lg text-gray-800">Total: {{ past.total }}</p>
+                <p class="text-gray-600">
+                  Redemptions:
+                  <span class="font-semibold">{{ past.redemptions }}</span>
+                </p>
+                <p class="text-gray-600">
+                  Total Scans:
+                  <span class="font-semibold">{{ past.total }}</span>
+                </p>
+              </div>
             </div>
           </div>
 

@@ -126,7 +126,7 @@ const isActive = (path: string) => route.path === path;
           </router-link>
         </div>
 
-        <nav class="hidden sm:flex sm:grow sm:justify-end">
+        <nav class="hidden sm:flex sm:grow sm:justify-end bg-blue-800 w-fit">
           <NavigationMenu>
             <NavigationMenuList class="flex gap-7">
               <NavigationMenuItem
