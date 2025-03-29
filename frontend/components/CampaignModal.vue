@@ -1,181 +1,98 @@
-<template>
-  <div>
-    <Form v-slot="{ handleSubmit }" keep-values :validation-schema="formSchema">
-      <Dialog v-model:open="isOpen">
-        <DialogTrigger as-child>
-          <Button
-            class="mt-6 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hover:text-white transition"
-          >
-            Create New Campaign
-          </Button>
-        </DialogTrigger>
-        <DialogContent class="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle class="text-2xl font-bold text-gray-800">
-              Create a New Campaign
-            </DialogTitle>
-            <DialogDescription>
-              Create a new campaign by filling in the following fields.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form id="dialogForm" @submit.prevent="handleSubmit(onSubmit)">
-            <FormField
-              v-slot="{ componentField, errorMessage }"
-              name="perkTitle"
-            >
-              <FormItem class="mt-4">
-                <FormLabel class="block text-base font-medium text-gray-700">
-                  Perk Title
-                </FormLabel>
-                <FormControl class="">
-                  <Input
-                    v-bind="componentField"
-                    class="my-2 p-3 border rounded-lg w-full"
-                    placeholder="e.g., Free Cookie."
-                  />
-                </FormControl>
-                <FormMessage class="h-2" v-if="errorMessage" />
-                <div v-else class="text-xs h-2"></div>
-              </FormItem>
-            </FormField>
-
-            <FormField
-              v-slot="{ componentField, errorMessage }"
-              name="perkDescription"
-            >
-              <FormItem class="mt-4">
-                <FormLabel class="block text-base font-medium text-gray-700">
-                  Perk Description
-                </FormLabel>
-                <FormControl class="">
-                  <Textarea
-                    v-bind="componentField"
-                    class="my-2 p-3 border rounded-lg w-full"
-                    placeholder="e.g., Get a free cookie with any coffee purchase!"
-                  />
-                </FormControl>
-                <FormMessage class="h-2" v-if="errorMessage" />
-                <div v-else class="text-xs h-2"></div>
-              </FormItem>
-            </FormField>
-
-            <FormField
-              v-slot="{ componentField, errorMessage }"
-              name="totalPerks"
-            >
-              <FormItem class="mt-4">
-                <FormLabel class="block text-base font-medium text-gray-700">
-                  Total Perks Available
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    v-bind="componentField"
-                    type="number"
-                    min="1"
-                    class="mt-2 p-3 border rounded-lg w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    placeholder="e.g., 50"
-                  />
-                </FormControl>
-                <FormMessage class="h-2" v-if="errorMessage" />
-                <div v-else class="text-xs h-2"></div>
-              </FormItem>
-            </FormField>
-
-            <DialogFooter>
-              <div class="mt-6 flex justify-end w-full">
-                <Button
-                  type="submit"
-                  class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                >
-                  Confirm & Generate QR
-                </Button>
-              </div>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </Form>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { toast } from "@/components/ui/toast";
-import { toTypedSchema } from "@vee-validate/zod";
-import { Inbox } from "lucide-vue-next";
+import { ref, computed } from "vue";
 import * as z from "zod";
 import Input from "./ui/input/Input.vue";
 
 const isOpen = ref(false);
 
-const formSchema = toTypedSchema(
-  z.object({
-    perkTitle: z
-      .string()
-      .min(5, {
-        message: "Perk title need to be at least 3 characters.",
-      })
-      .max(100, {
-        message: "Perk title needs to be fewer than 50 characters",
-      }),
-    perkDescription: z
-      .string()
-      .min(5, {
-        message: "Perk description need to be at least 5 characters.",
-      })
-      .max(100, {
-        message: "Perk description needs to be fewer than 100 characters",
-      }),
-    totalPerks: z
-      .number({ message: "Total perks must be a valid number" })
-      .min(1, { message: "Total perks must be at least 1" }),
-  })
-);
+const perkTitle = ref("");
+const perkDescription = ref("");
+const totalPerks = ref<number | undefined>(undefined); // fixed here
 
+const touched = ref({
+  perkTitle: false,
+  perkDescription: false,
+  totalPerks: false,
+});
+
+// Mark field as touched
+const markTouched = (field: string) => {
+  touched.value[field] = true;
+};
+
+// Form validation schema
+const formSchema = z.object({
+  perkTitle: z
+    .string()
+    .min(5, "Perk title must be at least 5 characters.")
+    .max(50, "Perk title must be fewer than 50 characters"),
+  perkDescription: z
+    .string()
+    .min(5, "Perk description must be at least 5 characters.")
+    .max(100, "Perk description must be fewer than 100 characters"),
+  totalPerks: z
+    .number({ invalid_type_error: "Total perks must be a valid number" })
+    .min(1, "Total perks must be at least 1"),
+});
+
+// Compute validation errors
+const formErrors = computed(() => {
+  const result = formSchema.safeParse({
+    perkTitle: perkTitle.value,
+    perkDescription: perkDescription.value,
+    totalPerks: totalPerks.value !== undefined ? totalPerks.value : NaN,
+  });
+
+  if (result.success) return {};
+
+  return Object.fromEntries(
+    result.error.issues.map((issue) => [issue.path[0], issue.message])
+  );
+});
+
+const isFormValid = computed(() => Object.keys(formErrors.value).length === 0);
+
+// Utility to get auth token from cookies
 const getToken = () => {
   const match = document.cookie.match(new RegExp("(^| )auth_token=([^;]+)"));
   return match ? match[2] : null;
 };
 
-async function onSubmit(values: any) {
+// Form submission
+async function onSubmit() {
+  if (!isFormValid.value) {
+    toast({
+      title: "Form Error",
+      description: "Please correct errors before submitting.",
+    });
+    return;
+  }
+
   try {
     const response: any = await $fetch(
       "http://localhost:8000/account/create-perk/",
       {
         method: "POST",
-        headers: {
-          Authorization: `Token ${getToken()}`,
-        },
+        headers: { Authorization: `Token ${getToken()}` },
         body: {
-          title: values.perkTitle,
-          description: values.perkDescription,
-          total: values.totalPerks,
+          title: perkTitle.value,
+          description: perkDescription.value,
+          total: totalPerks.value,
         },
       }
     );
 
     const store = usePerkStore();
-
-    store.setPerk({
-      title: response.title,
-      description: response.description,
-      total: response.total,
-      remaining: response.remaining,
-      isActive: response.is_active,
-      redemptions: response.redemptions,
-      created_at: response.created_at,
-      ended_at: response.ended_at,
-      id: response.id,
-    });
+    store.setPerk(response);
 
     isOpen.value = false;
 
-    setTimeout(() => {
-      toast({
-        title: "Congratulations 🎉",
-        description: `Your perk campaign has been successfully created! Please print your QR code.`,
-      });
-    }, 300);
+    toast({
+      title: "Congratulations 🎉",
+      description:
+        "Your perk campaign has been successfully created! Please print your QR code.",
+    });
   } catch (error) {
     console.error("Failed to create campaign:", error);
     toast({
@@ -185,3 +102,112 @@ async function onSubmit(values: any) {
   }
 }
 </script>
+
+<template>
+  <div>
+    <Dialog v-model:open="isOpen">
+      <DialogTrigger as-child>
+        <button
+          class="mt-6 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+        >
+          Create New Campaign
+        </button>
+      </DialogTrigger>
+
+      <DialogContent class="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle class="text-2xl font-bold text-gray-800">
+            Create a New Campaign
+          </DialogTitle>
+          <DialogDescription>
+            Fill in the details below to create your perk campaign.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form @submit.prevent="onSubmit">
+          <!-- Perk Title -->
+          <Label class="block mb-1 font-medium text-gray-700" for="perkTitle"
+            >Perk Title</Label
+          >
+          <Input
+            id="perkTitle"
+            v-model="perkTitle"
+            placeholder="Discounted Latte"
+            class="w-full p-2 border rounded-lg"
+            @blur="markTouched('perkTitle')"
+          />
+          <p class="text-red-500 text-sm h-5">
+            {{ touched.perkTitle ? formErrors.perkTitle : "" }}
+          </p>
+
+          <!-- Perk Description -->
+          <Label
+            class="block mt-3 mb-1 font-medium text-gray-700"
+            for="perkDescription"
+          >
+            Perk Description
+          </Label>
+          <Textarea
+            id="perkDescription"
+            v-model="perkDescription"
+            placeholder="Get $2 off a latte"
+            class="w-full p-2 border rounded-lg"
+            @blur="markTouched('perkDescription')"
+          />
+          <p class="text-red-500 text-sm h-5">
+            {{ touched.perkDescription ? formErrors.perkDescription : "" }}
+          </p>
+
+          <!-- Total Perks -->
+          <Label
+            class="block mt-3 mb-1 font-medium text-gray-700"
+            for="totalPerks"
+          >
+            Total Perks Available
+          </Label>
+          <Input
+            id="totalPerks"
+            v-model.number="totalPerks"
+            type="number"
+            placeholder="50"
+            class="w-full p-2 border rounded-lg no-arrows"
+            @blur="markTouched('totalPerks')"
+          />
+          <p class="text-red-500 text-sm h-5">
+            {{ touched.totalPerks ? formErrors.totalPerks : "" }}
+          </p>
+
+          <!-- Submit Button -->
+          <DialogFooter>
+            <div class="mt-6 w-full">
+              <button
+                type="submit"
+                :disabled="!isFormValid"
+                :class="[
+                  'w-full py-2 rounded-lg transition text-white',
+                  isFormValid
+                    ? 'bg-blue-600 hover:bg-blue-700'
+                    : 'bg-gray-400 cursor-not-allowed',
+                ]"
+              >
+                Confirm & Generate QR
+              </button>
+            </div>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  </div>
+</template>
+
+<style scoped>
+.no-arrows::-webkit-inner-spin-button,
+.no-arrows::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-arrows {
+  -moz-appearance: textfield;
+}
+</style>

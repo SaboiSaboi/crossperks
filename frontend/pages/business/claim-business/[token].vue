@@ -32,7 +32,7 @@ const markTouched = (field: string) => {
   touched.value[field] = true;
 };
 
-const { data: business, error } = await useAsyncData("business", async () => {
+const { data: business } = await useAsyncData("business", async () => {
   try {
     const businessData: any = await $fetch(
       `http://localhost:8000/account/business/${claimToken}/`
