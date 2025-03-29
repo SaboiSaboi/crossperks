@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
+import { z } from "zod";
 import {
   Card,
   CardHeader,
@@ -11,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-const allIdentifiers = ref<any>([]);
+
 const router = useRouter();
 const { handleCheckAuth } = useAuthS();
 
@@ -19,7 +20,7 @@ const business = ref({
   official_name: "",
   street_address: "",
   city: "",
-  state: "",
+  state: "Oregon",
   zip_code: "",
   category: "",
   website: "",
@@ -27,38 +28,68 @@ const business = ref({
   identifiers: [],
 });
 
+const allIdentifiers = ref<any>([]);
+const errorMessages = ref<Record<string, string>>({});
+const touched = ref<Record<string, boolean>>({});
+
+const schema = z.object({
+  official_name: z.string().min(2, "Business name required"),
+  street_address: z.string().min(5, "Street address required"),
+  city: z.string().min(2, "City required"),
+  zip_code: z.string().regex(/^\d{5}$/, "Zip code must be exactly 5 digits"),
+  category: z.string().min(2, "Category required"),
+  website: z.string().url("Enter a valid URL"),
+  phone: z.string().optional(),
+});
+
+const isFormValid = computed(() => {
+  const result = schema.safeParse(business.value);
+  errorMessages.value = result.success
+    ? {}
+    : Object.fromEntries(
+        result.error.issues.map((e) => [e.path[0], e.message])
+      );
+
+  return result.success;
+});
+
 onMounted(async () => {
   try {
     const user: any = await handleCheckAuth();
-    const businessProfile = user.business_profile;
+    const profile = user.business_profile;
 
     business.value = {
-      official_name: businessProfile.official_name,
-      street_address: businessProfile.street_address,
-      city: businessProfile.city,
-      state: businessProfile.state,
-      zip_code: businessProfile.zip_code,
+      official_name: profile.official_name,
+      street_address: profile.street_address,
+      city: profile.city,
+      state: "Oregon",
+      zip_code: profile.zip_code,
       category: "",
-      website: "https://www.somewebsite.com",
+      website: profile.website ?? "https://",
       phone: "",
-      identifiers: businessProfile.identifiers,
+      identifiers: profile.identifiers || [],
     };
+
     const response: any = await $fetch(
       "http://localhost:8000/account/identifiers/"
     );
     allIdentifiers.value = response;
   } catch (error) {
-    console.error("Error fetching user profile:", error);
+    console.error("Error fetching profile or identifiers:", error);
   }
 });
 
-const getIdentifierIds = (selectedNames) => {
-  return allIdentifiers.value
-    .filter((identifier) => selectedNames.includes(identifier.name))
-    .map((identifier) => identifier.id);
-};
+const getIdentifierIds = (selectedNames) =>
+  allIdentifiers.value
+    .filter((id) => selectedNames.includes(id.name))
+    .map((id) => id.id);
 
 const completeOnboarding = async () => {
+  if (!isFormValid.value) {
+    alert("Please fix errors before continuing.");
+    return;
+  }
+
   try {
     const token = useCookie("auth_token");
 
@@ -75,14 +106,19 @@ const completeOnboarding = async () => {
 
     router.replace("/business");
   } catch (error) {
-    console.error("Failed to complete onboarding:", error);
-    alert("Failed to complete onboarding. Please try again.");
+    console.error("Onboarding failed:", error);
+    alert("Onboarding failed. Please try again.");
   }
 };
+
+const markTouched = (field: string) => {
+  touched.value[field] = true;
+};
 </script>
+
 <template>
   <div
-    class="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8"
+    class="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4"
   >
     <NuxtLink to="/" class="text-3xl font-bold mb-6">CrossPerks</NuxtLink>
 
@@ -103,8 +139,11 @@ const completeOnboarding = async () => {
             <Input
               id="official_name"
               v-model="business.official_name"
-              required
+              @blur="markTouched('official_name')"
             />
+            <p class="text-sm text-red-500">
+              {{ touched.official_name && errorMessages.official_name }}
+            </p>
           </div>
 
           <div>
@@ -112,23 +151,46 @@ const completeOnboarding = async () => {
             <Input
               id="streetAddress"
               v-model="business.street_address"
-              required
+              @blur="markTouched('street_address')"
             />
+            <p class="text-sm text-red-500">
+              {{ touched.street_address && errorMessages.street_address }}
+            </p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="grid grid-cols-2 gap-3">
             <div>
               <Label for="city">City</Label>
-              <Input id="city" v-model="business.city" required />
+              <Input
+                id="city"
+                v-model="business.city"
+                @blur="markTouched('city')"
+              />
+              <p class="text-sm text-red-500">
+                {{ touched.city && errorMessages.city }}
+              </p>
             </div>
             <div>
               <Label for="state">State</Label>
-              <Input id="state" v-model="business.state" required />
+              <Input
+                id="state"
+                v-model="business.state"
+                disabled
+                class="bg-gray-100 cursor-not-allowed"
+              />
             </div>
-            <div>
-              <Label for="zipCode">Zip Code</Label>
-              <Input id="zipCode" v-model="business.zip_code" required />
-            </div>
+          </div>
+
+          <div>
+            <Label for="zipCode">Zip Code</Label>
+            <Input
+              id="zipCode"
+              v-model="business.zip_code"
+              @blur="markTouched('zip_code')"
+            />
+            <p class="text-sm text-red-500">
+              {{ touched.zip_code && errorMessages.zip_code }}
+            </p>
           </div>
 
           <div>
@@ -136,9 +198,12 @@ const completeOnboarding = async () => {
             <Input
               id="category"
               v-model="business.category"
-              placeholder="e.g. Cafe, Retail, Salon"
-              required
+              placeholder="e.g., Cafe, Retail"
+              @blur="markTouched('category')"
             />
+            <p class="text-sm text-red-500">
+              {{ touched.category && errorMessages.category }}
+            </p>
           </div>
 
           <div>
@@ -147,16 +212,18 @@ const completeOnboarding = async () => {
               id="website"
               v-model="business.website"
               type="url"
-              required
+              @blur="markTouched('website')"
             />
+            <p class="text-sm text-red-500">
+              {{ touched.website && errorMessages.website }}
+            </p>
           </div>
 
           <div>
-            <Label for="phone">Contact Phone Number (Optional)</Label>
+            <Label for="phone">Contact Phone (Optional)</Label>
             <Input
               id="phone"
               v-model="business.phone"
-              type="tel"
               placeholder="123-456-7890"
             />
           </div>
@@ -165,22 +232,24 @@ const completeOnboarding = async () => {
             <Label>Select Your Business Identifiers</Label>
             <div class="grid grid-cols-2 gap-2 mt-2">
               <label
-                v-for="identifier in allIdentifiers"
-                :key="identifier.id"
+                v-for="id in allIdentifiers"
+                :key="id.id"
                 class="flex items-center space-x-2"
               >
                 <input
                   type="checkbox"
-                  :value="identifier.name"
+                  :value="id.name"
                   v-model="business.identifiers"
                   class="rounded border-gray-300"
                 />
-                <span>{{ identifier.name }}</span>
+                <span>{{ id.name }}</span>
               </label>
             </div>
           </div>
 
-          <Button type="submit" class="w-full">Save & Complete</Button>
+          <Button type="submit" class="w-full" :disabled="!isFormValid">
+            Save & Complete
+          </Button>
         </form>
       </CardContent>
     </Card>
