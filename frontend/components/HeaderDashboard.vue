@@ -1,25 +1,20 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { useRoute } from "vue-router";
 
-// Initialize router and auth state
 const route = useRoute();
 const { handleCheckAuth, logout } = useAuthS();
 
-// Properly declare reactive refs
 const user = ref<any>(null);
 const userType = ref<string>("");
 
-// Ensure async data fetching on component mount
 user.value = await handleCheckAuth();
 userType.value = user.value?.user?.user_type || "";
 
-// Navigation Links
 const navLinks = computed(() => [
   {
     name: "Dashboard",
-    path: `/${userType.value}/dashboard`,
+    path: user.value ? `/${userType.value}/dashboard` : "#",
     show: !!user.value,
   },
   {
@@ -43,9 +38,9 @@ const navLinks = computed(() => [
     show: !!user.value,
   },
   {
-    name: "Sign In",
-    path: "/signin",
-    show: !user.value,
+    name: user.value ? "Logout" : "Sign In",
+    path: user.value ? "#" : "/signin",
+    show: true,
   },
   {
     name: "Join Now",
@@ -54,7 +49,6 @@ const navLinks = computed(() => [
   },
 ]);
 
-// Highlight active link based on current route
 const isActive = (path: string) => route.path === path;
 </script>
 
@@ -142,43 +136,44 @@ const isActive = (path: string) => route.path === path;
               >
                 <NavigationMenuLink
                   :href="link.path"
-                  @click="link.name === 'Sign In' ? logout : null"
-                  class="text-xl transition-colors"
+                  class="text-xl transition-colors flex items-center gap-2"
                   :class="
                     isActive(link.path)
                       ? 'text-slate-50 underline font-semibold'
                       : 'text-slate-200 hover:text-slate-50 hover:underline'
                   "
                 >
-                  <span
-                    v-if="link.name !== 'Sign In' && link.name !== 'Join Now'"
+                  <NavigationMenuLink
+                    href="/signin"
+                    @click="logout"
+                    class="hover:underline text-xl"
+                    v-if="link.name === 'Logout'"
                   >
-                    {{ link.name }}
-                  </span>
-
-                  <!-- Icon specifically for Sign In / Logout -->
-                  <svg
-                    v-if="link.name === 'Sign In' && user"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="size-6"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
-                    />
-                  </svg>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      class="size-6"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+                      />
+                    </svg>
+                  </NavigationMenuLink>
+                  <span v-if="link.name === 'Logout'"></span>
 
                   <span
-                    v-if="link.name === 'Join Now'"
+                    v-else-if="link.name === 'Join Now'"
                     class="text-black text-xl bg-slate-200 hover:bg-slate-50 border-[1.5px] border-black px-4 py-2 rounded-full transition-all"
                   >
                     {{ link.name }}
                   </span>
+
+                  <span v-else>{{ link.name }}</span>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
@@ -192,7 +187,6 @@ const isActive = (path: string) => route.path === path;
 </template>
 
 <style scoped>
-/* Large Screen SVG Animation */
 .svg-text {
   font-size: 180px;
   font-weight: 800;
@@ -207,7 +201,6 @@ const isActive = (path: string) => route.path === path;
   shape-rendering: crispEdges;
 }
 
-/* Small Screen SVG Animation */
 .svg-text-small {
   font-size: 140px;
   font-weight: 700;
@@ -222,7 +215,6 @@ const isActive = (path: string) => route.path === path;
   shape-rendering: crispEdges;
 }
 
-/* Hover Effect: Glow and Subtle Color Shift */
 .svg-text:hover,
 .svg-text-small:hover {
   stroke-width: 4.1;
@@ -230,7 +222,6 @@ const isActive = (path: string) => route.path === path;
     drop-shadow(0px 0px 14px rgba(255, 180, 50, 0.2));
 }
 
-/* Large SVG Stroke Animation */
 @keyframes drawText {
   0% {
     stroke-dashoffset: 2200;
@@ -240,7 +231,6 @@ const isActive = (path: string) => route.path === path;
   }
 }
 
-/* Small SVG Stroke Animation */
 @keyframes drawTextSmall {
   0% {
     stroke-dashoffset: 1800;
@@ -250,7 +240,6 @@ const isActive = (path: string) => route.path === path;
   }
 }
 
-/* Smooth Fade-in Effect */
 @keyframes fadeIn {
   0% {
     opacity: 0;
