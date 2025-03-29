@@ -3,6 +3,7 @@ import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 
 const { handleCheckAuth, logout } = useAuthS();
 const user: any = await handleCheckAuth();
+const userType = user.user.user_type;
 </script>
 
 <template>
@@ -98,7 +99,13 @@ const user: any = await handleCheckAuth();
                 v-show="user"
               >
                 <NavigationMenuLink
-                  href="http://localhost:3000/customer/profile"
+                  :href="
+                    userType === 'customer'
+                      ? 'http://localhost:3000/customer/profile'
+                      : userType === 'business'
+                      ? 'http://localhost:3000/business/profile'
+                      : '#'
+                  "
                   class="hover:underline text-xl"
                 >
                   <p class="hover:underline text-xl">Profile</p>
