@@ -1,29 +1,55 @@
 <script setup lang="ts">
-import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
-const user = ref<{
-  user?: {
-    id: number;
-    name: string;
-    email: string;
-    user_type: string;
-    is_onboarded: boolean;
-  };
-  auth_token?: string;
-  business_profile?: {
-    official_name: string;
-    street_address: string;
-    city: string;
-    state: string;
-    zip_code: string;
-    is_claimed: boolean;
-    created_at: string;
-    qr_code: string;
-    identifiers: string[];
-  };
-} | null>(null);
+import { computed, ref } from "vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
 const { handleCheckAuth, logout } = useAuthS();
-user.value = (await handleCheckAuth()) ?? null;
-const userType = user.value?.user?.user_type;
+
+const user = ref<any>(null);
+const userType = ref<string>("");
+
+user.value = await handleCheckAuth();
+userType.value = user.value?.user?.user_type || "";
+
+const navLinks = computed(() => [
+  {
+    name: "Dashboard",
+    path: user.value ? `/${userType.value}/dashboard` : "#",
+    show: !!user.value,
+  },
+  {
+    name: "Businesses",
+    path: "/businesses",
+    show: true,
+  },
+  {
+    name: "Business",
+    path: "/business",
+    show: true,
+  },
+  {
+    name: "Profile",
+    path:
+      userType.value === "customer"
+        ? "/customer/profile"
+        : userType.value === "business"
+        ? "/business/profile"
+        : "#",
+    show: !!user.value,
+  },
+  {
+    name: user.value ? "Logout" : "Sign In",
+    path: user.value ? "#" : "/signin",
+    show: true,
+  },
+  {
+    name: "Join Now",
+    path: "/signup",
+    show: !user.value,
+  },
+]);
+
+const isActive = (path: string) => route.path === path;
 </script>
 
 <template>
@@ -104,81 +130,55 @@ const userType = user.value?.user?.user_type;
           <NavigationMenu>
             <NavigationMenuList class="flex gap-7">
               <NavigationMenuItem
-                v-show="user"
-                class="text-slate-200 hover:text-slate-50"
+                v-for="link in navLinks"
+                :key="link.path"
+                v-show="link.show"
               >
                 <NavigationMenuLink
-                  :href="`http://localhost:3000/${userType}/dashboard`"
-                  class="hover:underline text-xl"
+                  :href="link.path"
+                  class="text-xl transition-colors flex items-center gap-2"
+                  :class="
+                    isActive(link.path)
+                      ? 'text-slate-50 underline font-semibold'
+                      : 'text-slate-200 hover:text-slate-50 hover:underline'
+                  "
                 >
-                  <p class="hover:underline text-xl">Dashboard</p>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem class="text-slate-200 hover:text-slate-50">
-                <NavigationMenuLink
-                  href="/businesses"
-                  class="hover:underline text-xl"
-                >
-                  <p class="hover:underline text-xl">Businesses</p>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem class="text-slate-200 hover:text-slate-50">
-                <NavigationMenuLink
-                  href="/business"
-                  class="hover:underline text-xl"
-                >
-                  <p class="hover:underline text-xl">Business</p>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem
-                class="text-slate-200 hover:text-slate-50"
-                v-show="user"
-              >
-                <NavigationMenuLink
-                  href="/signin"
-                  @click="logout"
-                  class="hover:underline text-xl"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="size-6"
+                  <NavigationMenuLink
+                    href="/signin"
+                    @click="logout"
+                    class="hover:underline text-xl"
+                    v-if="link.name === 'Logout'"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
-                    />
-                  </svg>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem
-                class="text-slate-200 hover:text-slate-50"
-                v-show="!user"
-              >
-                <NavigationMenuLink
-                  href="/signin"
-                  class="hover:underline text-xl"
-                >
-                  Sign In
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              <NavigationMenuItem v-show="!user">
-                <NavigationMenuLink
-                  href="/signup"
-                  :class="navigationMenuTriggerStyle()"
-                  class="text-black text-xl bg-slate-200 hover:bg-slate-50 border-[1.5px] border-black px-4 py-2 rounded-full transition-all"
-                >
-                  Join Now
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      class="size-6"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
+                      />
+                    </svg>
+                  </NavigationMenuLink>
+                  <span v-if="link.name === 'Logout'"></span>
+
+                  <span
+                    v-else-if="link.name === 'Join Now'"
+                    class="text-black text-xl bg-slate-200 hover:bg-slate-50 border-[1.5px] border-black px-4 py-2 rounded-full transition-all"
+                  >
+                    {{ link.name }}
+                  </span>
+
+                  <span v-else>{{ link.name }}</span>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </nav>
-
         <BurgerMenu />
         <div class="block sm:hidden">a menu</div>
       </div>
@@ -187,7 +187,6 @@ const userType = user.value?.user?.user_type;
 </template>
 
 <style scoped>
-/* Large Screen SVG Animation */
 .svg-text {
   font-size: 180px;
   font-weight: 800;
@@ -202,7 +201,6 @@ const userType = user.value?.user?.user_type;
   shape-rendering: crispEdges;
 }
 
-/* Small Screen SVG Animation */
 .svg-text-small {
   font-size: 140px;
   font-weight: 700;
@@ -217,7 +215,6 @@ const userType = user.value?.user?.user_type;
   shape-rendering: crispEdges;
 }
 
-/* Hover Effect: Glow and Subtle Color Shift */
 .svg-text:hover,
 .svg-text-small:hover {
   stroke-width: 4.1;
@@ -225,7 +222,6 @@ const userType = user.value?.user?.user_type;
     drop-shadow(0px 0px 14px rgba(255, 180, 50, 0.2));
 }
 
-/* Large SVG Stroke Animation */
 @keyframes drawText {
   0% {
     stroke-dashoffset: 2200;
@@ -235,7 +231,6 @@ const userType = user.value?.user?.user_type;
   }
 }
 
-/* Small SVG Stroke Animation */
 @keyframes drawTextSmall {
   0% {
     stroke-dashoffset: 1800;
@@ -245,7 +240,6 @@ const userType = user.value?.user?.user_type;
   }
 }
 
-/* Smooth Fade-in Effect */
 @keyframes fadeIn {
   0% {
     opacity: 0;

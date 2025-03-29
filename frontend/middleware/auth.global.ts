@@ -10,15 +10,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
     "/",
   ];
 
-  const onboardingRoutes = ["/customer/onboarding", "/business/onboarding"];
-
   const isAuthRoute = authRoutes.includes(to.path);
   const isPublicRoute =
     publicRoutes.includes(to.path) ||
     to.path.startsWith("/business/claim-business/");
 
   if (!token.value) {
-    // ✅ Allow access to public routes when not signed in
     if (isPublicRoute || isAuthRoute) {
       return;
     }
@@ -48,22 +45,18 @@ export default defineNuxtRouteMiddleware(async (to) => {
       return navigateTo("/customer/dashboard");
     }
 
-    // ❌ Block signed-in users from accessing auth pages (redirect them to their dashboard)
     if (isAuthRoute) {
       return navigateTo(`/${userType}`);
     }
 
-    // ✅ Allow access to public pages for signed-in users
     if (isPublicRoute) {
       return;
     }
 
-    // Redirect non-onboarded users to onboarding
     if (!isOnboarded && to.path !== `/${userType}/onboarding`) {
       return navigateTo(`/${userType}/onboarding`);
     }
 
-    // Prevent customers from accessing business routes and vice versa
     if (to.path.startsWith("/customer") && userType !== "customer") {
       return navigateTo(`/${userType}`);
     }

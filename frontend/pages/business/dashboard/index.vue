@@ -74,7 +74,7 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-gray-50 text-gray-900">
-    <section class="bg-gray-950"><HeaderDashboard /></section>
+    <section class="bg-gray-950"><Header /></section>
     <ClientOnly>
       <div
         class="shadow-md p-6 md:p-10 flex flex-col md:flex-row justify-center items-center"
@@ -251,12 +251,10 @@ onMounted(async () => {
             Past Campaigns
           </h2>
 
-          <!-- ✅ Show a loading indicator while past perks are loading -->
           <div v-if="perkStore.isLoading" class="flex justify-center py-5">
             <p class="text-gray-500">Loading past campaigns...</p>
           </div>
 
-          <!-- ✅ Display past campaigns once loaded -->
           <div
             v-else-if="perkStore.pastPerks && perkStore.pastPerks.length > 0"
             class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6"
@@ -280,7 +278,6 @@ onMounted(async () => {
             </div>
           </div>
 
-          <!-- ✅ Show this if there are no past perks -->
           <div v-else class="mt-24 text-lg flex justify-center items-center">
             No past campaigns yet
           </div>

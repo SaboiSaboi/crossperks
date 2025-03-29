@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { z } from "zod";
+import HeaderDashboard from "~/components/Header.vue";
 
 const BusinessSchema = z.object({
   category: z.string(),
@@ -55,15 +56,10 @@ onMounted(fetchBusinesses);
         Discover Local Businesses
       </h1>
 
-      <!-- Loading & Error Handling -->
-      <!-- <div v-if="loading" class="text-center text-white">
-        Loading businesses...
-      </div> -->
       <div v-if="error" class="text-center text-red-500">
         Failed to load data.
       </div>
 
-      <!-- Business Grid -->
       <div
         v-if="businesses.length"
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
@@ -100,7 +96,6 @@ onMounted(fetchBusinesses);
             </svg>
           </div>
 
-          <!-- Business Details -->
           <div class="p-5 bg-white rounded-b-lg">
             <h2 class="text-lg font-semibold text-gray-900">
               {{ business.official_name }}

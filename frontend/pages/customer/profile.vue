@@ -106,7 +106,7 @@ const formattedDate = computed(() => {
 
 <template>
   <div>
-    <div class="bg-gray-950"><HeaderProfilePage /></div>
+    <div class="bg-gray-950"><Header /></div>
 
     <div
       class="max-w-2xl mx-auto py-4 h-dvh flex flex-col items-center justify-center"

@@ -38,7 +38,7 @@ onMounted(fetchPerks);
 </script>
 <template>
   <div>
-    <div class="bg-gray-950"><HeaderDashboard /></div>
+    <div class="bg-gray-950"><Header /></div>
     <div
       class="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-10"
     >

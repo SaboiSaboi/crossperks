@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <section class="bg-gray-950"><HeaderPastCampaign /></section>
+    <section class="bg-gray-950"><Header /></section>
     <div
       class="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 my-16"
     >

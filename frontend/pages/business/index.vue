@@ -101,7 +101,6 @@ const features = [
       </div>
     </section>
 
-    <!-- Call to Action -->
     <section
       class="py-24 bg-gradient-to-br from-blue-900 to-blue-950 text-white text-center animate-fade-in"
     >
