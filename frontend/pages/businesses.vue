@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { z } from "zod";
-import HeaderDashboard from "~/components/HeaderDashboard.vue";
+import HeaderDashboard from "~/components/Header.vue";
 
 const BusinessSchema = z.object({
   category: z.string(),
@@ -49,7 +49,7 @@ onMounted(fetchBusinesses);
   <div
     class="min-h-screen flex flex-col justify-center items-center bg-black text-white w-full"
   >
-    <HeaderDashboard />
+    <Header />
 
     <div class="max-w-6xl mx-auto px-4 my-16 h-[90dvh] font-roboto">
       <h1 class="text-4xl font-bold text-white text-center my-12">

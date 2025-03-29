@@ -74,7 +74,7 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-gray-50 text-gray-900">
-    <section class="bg-gray-950"><HeaderDashboard /></section>
+    <section class="bg-gray-950"><Header /></section>
     <ClientOnly>
       <div
         class="shadow-md p-6 md:p-10 flex flex-col md:flex-row justify-center items-center"
