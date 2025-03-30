@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import { AxiosError } from "axios";
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import {
   type UserLoginSchema,
@@ -132,43 +133,45 @@ export const useAuthS = () => {
     mutationFn: handleLogin,
   });
 
-  function login(loginArgs: z.infer<typeof UserLoginSchema>) {
-    loginMutate(loginArgs, {
-      onError(e) {
-        console.log("this is the error", e);
-      },
-      onSuccess(data) {
-        setToken(data.auth_token);
+  type APIErrorResponse = {
+    detail: string;
+  };
 
-        if (data.user.user_type === "business") {
-          if (!data.user.onboarded) {
-            navigateTo(
-              {
-                path: "/business/onboarding",
-              },
-              {
-                replace: true,
-              }
-            );
-          } else {
-            navigateTo(
-              {
-                path: "/business/dashboard",
-              },
-              { replace: true }
-            );
+  function isAxiosError(error: unknown): error is AxiosError<APIErrorResponse> {
+    return (
+      typeof error === "object" && error !== null && "isAxiosError" in error
+    );
+  }
+
+  async function login(
+    loginArgs: z.infer<typeof UserLoginSchema>
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      loginMutate(loginArgs, {
+        onError(error) {
+          let message = "Incorrect email or password.";
+          if (isAxiosError(error)) {
+            message = error.response?.data?.detail || message;
           }
-        } else {
-          navigateTo(
-            {
-              path: "/customer/",
-            },
-            {
-              replace: true,
+          console.log("Login error:", error);
+          reject(new Error(message));
+        },
+        onSuccess(data) {
+          setToken(data.auth_token);
+
+          if (data.user.user_type === "business") {
+            if (!data.user.onboarded) {
+              navigateTo("/business/onboarding", { replace: true });
+            } else {
+              navigateTo("/business/dashboard", { replace: true });
             }
-          );
-        }
-      },
+          } else {
+            navigateTo("/customer/", { replace: true });
+          }
+
+          resolve();
+        },
+      });
     });
   }
 

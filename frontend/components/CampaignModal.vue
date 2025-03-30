@@ -199,15 +199,3 @@ async function onSubmit() {
     </Dialog>
   </div>
 </template>
-
-<style scoped>
-.no-arrows::-webkit-inner-spin-button,
-.no-arrows::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.no-arrows {
-  -moz-appearance: textfield;
-}
-</style>

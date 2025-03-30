@@ -6,13 +6,13 @@ import { useRoute } from "vue-router";
 
 // Fields
 const email = ref("");
+const userPasswordError = ref<string | null>(null);
 const verificationCode = ref("");
 const officialName = ref("");
 const userPassword = ref("");
 const confirmPassword = ref("");
 const errorMessage = ref<string | null>(null);
 const claimed = ref(false);
-
 const route = useRoute();
 const claimToken = route.params.token as string;
 
@@ -53,7 +53,12 @@ watchEffect(() => {
     officialName.value = business.value.official_name || "";
   }
 });
-
+const passwordRules = computed(() => ({
+  length: userPassword.value.length >= 8,
+  uppercase: /[A-Z]/.test(userPassword.value),
+  digit: /\d/.test(userPassword.value),
+  special: /[^a-zA-Z0-9]/.test(userPassword.value),
+}));
 // Email Validation schema
 const emailSchema = z.string().email("Please enter a valid email address");
 
@@ -97,6 +102,19 @@ const registrationErrors = computed(() => {
 const isRegistrationValid = computed(
   () => Object.keys(registrationErrors.value).length === 0
 );
+watch(userPassword, () => {
+  const result = registrationSchema.safeParse({
+    officialName: officialName.value || "placeholder",
+    userPassword: userPassword.value,
+    confirmPassword: confirmPassword.value || "placeholder",
+  });
+
+  const pwdIssue = result.success
+    ? null
+    : result.error.issues.find((i) => i.path[0] === "userPassword");
+
+  userPasswordError.value = pwdIssue?.message ?? null;
+});
 
 // API Calls
 const sendVerificationCode = async () => {
@@ -111,6 +129,7 @@ const sendVerificationCode = async () => {
       body: { email: email.value, user_type: "business" },
     });
     emailSent.value = true;
+    isVerified.value = false;
     toast({ title: "Code Sent", description: "Please check your email." });
   } catch {
     toast({ title: "Error", description: "Failed to send code." });
@@ -217,7 +236,7 @@ const completeRegistration = async () => {
         <!-- Verification Code -->
         <div v-if="emailSent && !isVerified">
           <Label for="verificationCode" class="block mb-2 font-medium">
-            Enter Verification Code
+            Enter Verification Code sent to your email
           </Label>
           <Input
             v-model="verificationCode"
@@ -264,26 +283,57 @@ const completeRegistration = async () => {
             <p v-else class="text-red-500 text-sm mb-2 h-[1.23rem]"></p>
           </div>
 
-          <div class="mb-3">
-            <Label for="userPassword" class="block mb-2 font-medium">
-              Password
-            </Label>
-            <Input
-              class="w-full p-3 mb-1 border rounded-lg"
-              id="userPassword"
-              v-model="userPassword"
-              type="password"
-              placeholder="Password"
-              @blur="markTouched('userPassword')"
-            />
+          <Label for="userPassword" class="block mb-2 font-medium"
+            >Password</Label
+          >
+          <Input
+            id="userPassword"
+            type="password"
+            placeholder="Password"
+            class="w-full p-3 mb-2 border rounded-lg"
+            v-model="userPassword"
+            @blur="markTouched('userPassword')"
+          />
+
+          <div v-if="touched.userPassword" class="space-y-1 my-4 text-sm">
             <p
-              v-if="touched.userPassword && registrationErrors.userPassword"
-              class="text-red-500 text-sm mb-2"
+              :class="[
+                'flex items-center gap-2',
+                passwordRules.length ? 'text-green-600' : 'text-red-600',
+              ]"
             >
-              {{ registrationErrors.userPassword }}
+              <span>{{ passwordRules.length ? "✅" : "❌" }}</span>
+              At least 8 characters
             </p>
-            <p v-else class="text-red-500 text-sm mb-2 h-[1.23rem]"></p>
+            <p
+              :class="[
+                'flex items-center gap-2',
+                passwordRules.uppercase ? 'text-green-600' : 'text-red-600',
+              ]"
+            >
+              <span>{{ passwordRules.uppercase ? "✅" : "❌" }}</span>
+              At least one uppercase letter
+            </p>
+            <p
+              :class="[
+                'flex items-center gap-2',
+                passwordRules.digit ? 'text-green-600' : 'text-red-600',
+              ]"
+            >
+              <span>{{ passwordRules.digit ? "✅" : "❌" }}</span>
+              At least one number
+            </p>
+            <p
+              :class="[
+                'flex items-center gap-2',
+                passwordRules.special ? 'text-green-600' : 'text-red-600',
+              ]"
+            >
+              <span>{{ passwordRules.special ? "✅" : "❌" }}</span>
+              At least one special character
+            </p>
           </div>
+          <p v-else class="text-red-500 text-sm mb-2 h-[1.23rem]"></p>
 
           <div>
             <Label for="confirmPassword" class="block mb-2 font-medium"
