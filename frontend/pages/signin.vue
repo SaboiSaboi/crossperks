@@ -12,18 +12,26 @@
           id="email"
           type="email"
           placeholder="Your Email"
-          class="w-full p-3 mb-4 border rounded-lg"
+          class="w-full p-3 border rounded-lg"
           v-model="email"
+          @blur="markTouched('email')"
         />
+        <p class="text-red-500 text-sm h-5 mb-2">
+          {{ touched.email ? formErrors.email : "" }}
+        </p>
 
         <Label class="block mb-2 font-medium" for="password">Password</Label>
         <Input
           id="password"
           type="password"
           placeholder="Your Password"
-          class="w-full p-3 mb-6 border rounded-lg"
+          class="w-full p-3 border rounded-lg"
           v-model="password"
+          @blur="markTouched('password')"
         />
+        <p class="text-red-500 text-sm h-5 mb-5">
+          {{ touched.password ? formErrors.password : "" }}
+        </p>
 
         <button
           :disabled="!email || !password"
@@ -31,12 +39,15 @@
             !email || !password
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-blue-600 hover:bg-blue-500',
-            'w-full py-2 text-white rounded-lg transition mb-4',
+            'w-full py-2 text-white rounded-lg transition mb-2',
           ]"
           type="submit"
         >
           Sign In
         </button>
+        <p v-if="loginErrorMessage" class="mb-2 text-sm text-red-600">
+          {{ loginErrorMessage }}
+        </p>
       </form>
 
       <!-- Alternative Sign-In Methods -->
@@ -65,12 +76,79 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { z } from "zod";
+import { toast } from "@/components/ui/toast";
+
 const authStore = useAuthS();
 
 const email = ref("");
+const loginErrorMessage = ref<string | null>(null);
+
 const password = ref("");
-const handleSignIn = () => {
-  authStore.login({ email: email.value, password: password.value });
+
+const touched = ref({
+  email: false,
+  password: false,
+});
+
+const markTouched = (field: string) => {
+  touched.value[field] = true;
+};
+
+const formSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(8, "Please enter your password"),
+});
+
+const formErrors = computed(() => {
+  const result = formSchema.safeParse({
+    email: email.value,
+    password: password.value,
+  });
+
+  if (result.success) return {};
+
+  return Object.fromEntries(
+    result.error.issues.map((issue) => [issue.path[0], issue.message])
+  );
+});
+
+const isFormValid = computed(() => Object.keys(formErrors.value).length === 0);
+
+const handleSignIn = async () => {
+  loginErrorMessage.value = null;
+
+  if (!isFormValid.value) {
+    toast({
+      title: "Form Error",
+      description: "Please correct errors before submitting.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  try {
+    await authStore.login({
+      email: email.value,
+      password: password.value,
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      loginErrorMessage.value = error.message;
+      toast({
+        title: "Login Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      loginErrorMessage.value = "An unexpected error occurred.";
+      toast({
+        title: "Login Failed",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
+  }
 };
 </script>
 
