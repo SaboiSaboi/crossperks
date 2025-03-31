@@ -287,6 +287,7 @@ export const useAuthS = () => {
     verifyCode,
     completeRegistration,
     getToken,
+    setToken,
     login,
     logout,
     handleCheckAuth,

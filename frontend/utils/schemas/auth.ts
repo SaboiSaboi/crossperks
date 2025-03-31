@@ -15,7 +15,7 @@ export const UserSchema = z.object({
 export const UserSchemaLogin = z.object({
   message: z.string(),
   user: z.object({
-    id: z.number(),
+    id: z.string(),
     email: z.string().email(),
     name: z.string(),
     user_type: z.string(),
