@@ -169,7 +169,6 @@ class CompleteRegistrationView(generics.CreateAPIView):
             response_data = {
                 "message": "Registration and login successful",
                 "user": {
-                    "id": user.id,
                     "email": user.email,
                     "name": user.name,
                     "user_type": user.user_type,

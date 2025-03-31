@@ -151,6 +151,16 @@ const verifyCode = async () => {
   }
 };
 
+const authStore = useAuthS();
+type CompleteRegistrationResponse = {
+  message: string;
+  user: {
+    email: string;
+    name: string;
+    user_type: "customer" | "business";
+  };
+  auth_token: string;
+};
 const completeRegistration = async () => {
   markTouched("officialName");
   markTouched("userPassword");
@@ -165,17 +175,23 @@ const completeRegistration = async () => {
   }
 
   try {
-    await $fetch("http://localhost:8000/account/complete-registration/", {
-      method: "POST",
-      body: {
-        claim_token: claimToken,
-        officialName: officialName.value,
-        email: email.value,
-        password: userPassword.value,
-      },
-    });
+    const response = await $fetch<CompleteRegistrationResponse>(
+      "http://localhost:8000/account/complete-registration/",
+      {
+        method: "POST",
+        body: {
+          claim_token: claimToken,
+          officialName: officialName.value,
+          email: email.value,
+          password: userPassword.value,
+        },
+      }
+    );
+
+    authStore.setToken(response.auth_token);
+
     toast({ title: "Success", description: "Registration completed." });
-    navigateTo("/business");
+    navigateTo("/business/dashboard");
   } catch {
     toast({ title: "Error", description: "Registration failed." });
   }
