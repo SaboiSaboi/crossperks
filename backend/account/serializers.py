@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from .models import BusinessIdentifier, BusinessProfile, CustomUser, CustomerProfile, Perk
+from .models import (
+    BusinessIdentifier,
+    BusinessProfile,
+    CustomUser,
+    CustomerProfile,
+    Perk,
+)
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -24,7 +30,7 @@ class BusinessProfileSerializer(serializers.ModelSerializer):
     category = serializers.CharField(required=False, allow_blank=True)
     website = serializers.URLField(required=False, allow_blank=True)
     phone = serializers.CharField(required=False, allow_blank=True)
-    
+
     # ✅ Accept IDs when writing (update)
     identifiers = serializers.PrimaryKeyRelatedField(
         queryset=BusinessIdentifier.objects.all(), many=True, required=False
@@ -43,14 +49,19 @@ class BusinessProfileSerializer(serializers.ModelSerializer):
             "phone",
             "logo",
             "identifiers",
+            "flyerMessage",
+            "flyerHeadline",
         ]
         read_only_fields = ["is_claimed", "claim_token", "qr_code"]
 
     def to_representation(self, instance):
         """Customize output to return identifier names instead of IDs."""
         data = super().to_representation(instance)
-        data["identifiers"] = [identifier.name for identifier in instance.identifiers.all()]
+        data["identifiers"] = [
+            identifier.name for identifier in instance.identifiers.all()
+        ]
         return data
+
 
 class PerkSerializer(serializers.ModelSerializer):
     """Serializer for Perk model"""
@@ -71,6 +82,7 @@ class PerkSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "business", "created_at"]
 
+
 class CustomerProfileSerializer(serializers.ModelSerializer):
     preferred_identifiers = serializers.PrimaryKeyRelatedField(
         queryset=BusinessIdentifier.objects.all(), many=True, required=False
@@ -83,5 +95,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         """Return identifier names instead of IDs."""
         data = super().to_representation(instance)
-        data["preferred_identifiers"] = [identifier.name for identifier in instance.preferred_identifiers.all()]
+        data["preferred_identifiers"] = [
+            identifier.name for identifier in instance.preferred_identifiers.all()
+        ]
         return data

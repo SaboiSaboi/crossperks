@@ -33,7 +33,6 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, email, name, password=None, **extra_fields):
         """Create and return a superuser with admin privileges"""
 
-        # Ensure superuser has admin privileges
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 
@@ -47,7 +46,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ("customer", "Customer"),
         ("business", "Business"),
     ]
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     email = models.EmailField(unique=True)
@@ -56,9 +55,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         max_length=10, choices=USER_TYPE_CHOICES, default="customer"
     )
 
-    # 🔥 ADD THESE TWO FIELDS TO FIX THE ERROR
-    is_staff = models.BooleanField(default=False)  # Required for Django admin
-    is_superuser = models.BooleanField(default=False)  # Required for superusers
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
 
     is_verified = models.BooleanField(default=False)
     is_onboarded = models.BooleanField(default=False)
@@ -74,58 +72,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return f"{self.name} ({self.user_type})"
 
 
-# class BusinessProfile(models.Model):
-#     user = models.OneToOneField(
-#         settings.AUTH_USER_MODEL,
-#         on_delete=models.SET_NULL,
-#         null=True,
-#         blank=True,
-#         related_name="business_profile",
-#     )
-
-#     # Business Details (Entered when business claims)
-#     official_name = models.CharField(max_length=255)
-#     street_address = models.CharField(max_length=255, blank=True, null=True)
-#     city = models.CharField(max_length=100, blank=True, null=True)
-#     state = models.CharField(max_length=100, blank=True, null=True)
-#     zip_code = models.CharField(max_length=20, blank=True, null=True)
-
-#     # Claiming System
-#     is_claimed = models.BooleanField(default=False)
-#     claim_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
-
-#     # QR Code
-#     qr_code = models.ImageField(upload_to="", blank=True, null=True)
-
-#     created_at = models.DateTimeField(auto_now_add=True)
-
-#     def __str__(self):
-#         return self.official_name
-
-#     def generate_qr_code(self):
-#         logger = logging.getLogger(__name__)
-#         """Generates and saves a QR code for the business in S3"""
-
-#         try:
-#             qr = qrcode.make(f"https://crossperks.com/business/{self.id}")
-#             buffer = BytesIO()
-#             qr.save(buffer, format="PNG")
-
-#             filename = f"business_qr_codes/qr_{self.id}.png"
-
-#             logger.debug(f"🚀 Attempting to upload QR Code: {filename}")
-
-#             # Save QR Code to S3
-#             self.qr_code.save(filename, ContentFile(buffer.getvalue()), save=True)
-
-#             logger.info(f"QR Code uploaded to S3: {self.qr_code.url}")
-#             print(f"QR Code uploaded to S3: {self.qr_code.url}")
-
-#         except Exception as e:
-#             logger.error(f"Failed to upload QR Code: {str(e)}")
-#             print(f"Failed to upload QR Code: {str(e)}")
-
-
 class BusinessIdentifier(models.Model):
     """Model for business identifiers (e.g., Women-Owned, LGBTQ+)."""
 
@@ -133,72 +79,10 @@ class BusinessIdentifier(models.Model):
 
     slug = models.SlugField(max_length=100, unique=True)
 
-    
     def __str__(self):
         return self.name
 
 
-# class BusinessProfile(models.Model):
-#     user = models.OneToOneField(
-#         settings.AUTH_USER_MODEL,
-#         on_delete=models.SET_NULL,
-#         null=True,
-#         blank=True,
-#         related_name="business_profile",
-#     )
-
-#     official_name = models.CharField(max_length=255)
-#     street_address = models.CharField(max_length=255, blank=True, null=True)
-#     city = models.CharField(max_length=100, blank=True, null=True)
-#     state = models.CharField(max_length=100, blank=True, null=True)
-#     zip_code = models.CharField(max_length=20, blank=True, null=True)
-
-#     is_claimed = models.BooleanField(default=False)
-#     website = models.CharField(max_length=255, blank=True, null=True)
-#     phone = models.CharField(max_length=255, blank=True, null=True)
-
-#     claim_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
-#     # Change to URLField
-#     qr_code_url = models.URLField(blank=True, null=True)
-
-#     created_at = models.DateTimeField(auto_now_add=True)
-
-#     def __str__(self):
-#         return self.official_name
-
-#     def generate_qr_code(self):
-#         logger = logging.getLogger(__name__)
-
-#         try:
-#             qr = qrcode.make(f"https://crossperks.com/business/{self.id}")
-#             buffer = BytesIO()
-#             qr.save(buffer, format="PNG")
-
-#             filename = f"business_qr_codes/qr_{self.id}.png"
-#             logger.debug(f"Attempting to upload QR Code: {filename}")
-
-#             # Manually upload to S3 using boto3
-
-#             s3 = boto3.client("s3")
-
-#             s3.put_object(
-#                 Bucket=settings.AWS_STORAGE_BUCKET_NAME,
-#                 Key=filename,
-#                 Body=buffer.getvalue(),
-#                 ContentType="image/png",
-#             )
-
-#             qr_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{filename}"
-
-#             # Save URL to model
-#             self.qr_code_url = qr_url
-#             self.save()
-
-#             logger.info(f"QR Code uploaded to S3: {self.qr_code_url}")
-
-
-#         except Exception as e:
-#             logger.error(f"Failed to upload QR Code: {str(e)}")
 class BusinessProfile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -215,6 +99,8 @@ class BusinessProfile(models.Model):
     zip_code = models.CharField(max_length=20, blank=True, null=True)
 
     category = models.CharField(max_length=100, blank=True, null=True)
+    flyerMessage = models.CharField(max_length=100, blank=True, null=True)
+    flyerHeadline = models.CharField(max_length=100, blank=True, null=True)
     website = models.URLField(blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     logo = models.URLField(null=True, blank=True)
@@ -275,7 +161,7 @@ class CustomerProfile(models.Model):
     previous_perks = models.ManyToManyField(
         "Perk", related_name="previous_perks", blank=True
     )
-    
+
     preferred_identifiers = models.ManyToManyField("BusinessIdentifier", blank=True)
 
     def __str__(self):

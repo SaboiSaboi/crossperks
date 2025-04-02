@@ -94,6 +94,7 @@ class VerifyCodeView(APIView):
                 {"error": "User not found."}, status=status.HTTP_404_NOT_FOUND
             )
 
+
 class UpdateNameView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -102,13 +103,21 @@ class UpdateNameView(APIView):
         raw_name = request.data.get("name")
 
         if not raw_name:
-            return Response({"error": "Name is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Name is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
-        normalized_name = " ".join(word.capitalize() for word in raw_name.strip().split())
+        normalized_name = " ".join(
+            word.capitalize() for word in raw_name.strip().split()
+        )
 
         user.name = normalized_name
         user.save()
-        return Response({"message": "Name updated successfully.", "name": normalized_name}, status=status.HTTP_200_OK)
+        return Response(
+            {"message": "Name updated successfully.", "name": normalized_name},
+            status=status.HTTP_200_OK,
+        )
+
 
 class CompleteRegistrationView(generics.CreateAPIView):
     permission_classes = [AllowAny]
@@ -245,7 +254,7 @@ class BusinessDetailView(APIView):
     Fetches a specific business's details using the claim token.
     """
 
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
 
     def get(self, request, claim_token):
 
@@ -381,6 +390,11 @@ class GetUserAPIView(APIView):
                     "is_claimed": business.is_claimed,
                     "created_at": business.created_at,
                     "qr_code": business.qr_code_url,
+                    "website": business.website,
+                    "category": business.category,
+                    "flyerMessage": business.flyerMessage,
+                    "flyerHeadline": business.flyerHeadline,
+                    "phone": business.phone,
                     "identifiers": [
                         identifier.name for identifier in business.identifiers.all()
                     ],
@@ -398,8 +412,9 @@ class GetUserAPIView(APIView):
                         customer.previous_perks.all(), many=True
                     ).data,
                     "preferred_identifiers": [
-                identifier.name for identifier in customer.preferred_identifiers.all()
-            ],
+                        identifier.name
+                        for identifier in customer.preferred_identifiers.all()
+                    ],
                 }
 
         return Response(response_data, status=status.HTTP_200_OK)
@@ -419,26 +434,29 @@ class CreatePerkView(CreateAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-
         business = user.business_profile
         serializer.save(business=business)
+
 
 class CustomerOnboardingView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, *args, **kwargs):
         """Allow customers to set preferred identifiers."""
-        customer_profile, created = CustomerProfile.objects.get_or_create(user=request.user)
-        serializer = CustomerProfileSerializer(customer_profile, data=request.data, partial=True)
+        customer_profile = CustomerProfile.objects.get_or_create(user=request.user)
+        serializer = CustomerProfileSerializer(
+            customer_profile, data=request.data, partial=True
+        )
 
         if serializer.is_valid():
             serializer.save()
-            request.user.is_onboarded = True  
+            request.user.is_onboarded = True
             request.user.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 class BusinessOnboardingView(generics.UpdateAPIView):
 
     serializer_class = BusinessProfileSerializer
@@ -446,7 +464,7 @@ class BusinessOnboardingView(generics.UpdateAPIView):
 
     def get_object(self):
         return get_object_or_404(BusinessProfile, user=self.request.user)
-   
+
     def update(self, request, *args, **kwargs):
         business_profile = self.get_object()
         serializer = self.serializer_class(
@@ -468,9 +486,7 @@ class UserPerkView(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        perk = get_object_or_404(
-            Perk, business__user=user, is_active=True
-        ) 
+        perk = get_object_or_404(Perk, business__user=user, is_active=True)
         serializer = self.get_serializer(perk)
         return Response({"perk": serializer.data})
 
