@@ -90,7 +90,6 @@ onMounted(async () => {
 
     await fetchIdentifiers();
 
-    // Pre-fill selected identifiers (if any)
     selectedIdentifiers.value = allIdentifiers.value
       .filter((id) => preferredIdentifiers.value.includes(id.name))
       .map((id) => id.id);
