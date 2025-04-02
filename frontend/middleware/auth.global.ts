@@ -1,7 +1,7 @@
 export default defineNuxtRouteMiddleware(async (to) => {
   const token = useCookie("auth_token");
 
-  const authRoutes = ["/signin", "/signup"];
+  const authRoutes = ["/signin", "/signup", "/signupbusiness"];
   const publicRoutes = [
     "/resetpassword",
     "/registeruser",

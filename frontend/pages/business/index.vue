@@ -51,7 +51,7 @@ const features = [
         >
           <NuxtLink
             class="text-xl px-8 py-4 bg-blue-400 text-[#333333] font-semibold rounded-full hover:bg-blue-500 transition shadow-lg"
-            to="/signup"
+            to="/signupbusiness"
           >
             Get Started for Free
           </NuxtLink>
