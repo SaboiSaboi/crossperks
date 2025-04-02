@@ -104,7 +104,7 @@ const completeOnboarding = async () => {
       },
     });
 
-    router.replace("/business");
+    router.replace("/business/dashboard");
   } catch (error) {
     console.error("Onboarding failed:", error);
     alert("Onboarding failed. Please try again.");
