@@ -4,13 +4,17 @@ from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
+from django.utils.crypto import get_random_string
 from .models import (
     BusinessIdentifier,
     BusinessProfile,
     CustomUser,
     CustomerProfile,
+    PasswordResetCode,
     Perk,
 )
 from .serializers import (
@@ -442,7 +446,6 @@ class CustomerOnboardingView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, *args, **kwargs):
-        """Allow customers to set preferred identifiers."""
         customer_profile = CustomerProfile.objects.get_or_create(user=request.user)
         serializer = CustomerProfileSerializer(
             customer_profile, data=request.data, partial=True
@@ -543,3 +546,96 @@ class BusinessIdentifierListView(APIView):
     def get(self, request):
         identifiers = BusinessIdentifier.objects.all().values("id", "name")
         return Response(identifiers)
+
+
+class SendResetCodeAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+
+        if not email:
+            return Response(
+                {"detail": "Email is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # ✅ Safe lookup without raising exception
+        user = CustomUser.objects.filter(email=email, is_verified=True).first()
+
+        if user:
+            code = get_random_string(length=6, allowed_chars="0123456789")
+            PasswordResetCode.objects.update_or_create(
+                user=user,
+                defaults={"code": code},
+            )
+
+            reset_url = (
+                f"http://localhost:3000/reset-password?email={email}&code={code}"
+            )
+
+            send_mail(
+                subject="Reset Your CrossPerks Password",
+                message=(
+                    f"Hi there,\n\n"
+                    f"To reset your password, click the link below or paste it in your browser:\n\n"
+                    f"{reset_url}\n\n"
+                    f"This link will expire in 10 minutes.\n\n"
+                    f"If you didn’t request this, you can ignore this email."
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+            )
+
+        # ✅ Always respond the same
+        return Response(
+            {
+                "detail": f"If an account exists for {email}, we’ve sent a password reset link."
+            }
+        )
+
+
+class ResetPasswordAPIView(APIView):
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+
+        email = request.data.get("email")
+        code = request.data.get("code")
+        new_password = request.data.get("new_password")
+
+        print("done...", email, code, new_password)
+
+        if not all([email, code, new_password]):
+            return Response(
+                {"detail": "Email, code, and new password are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            user = CustomUser.objects.get(email=email, is_verified=True)
+
+            reset_entry = PasswordResetCode.objects.get(user=user, code=code)
+            print("user", reset_entry.updated_at)
+            if reset_entry.updated_at < timezone.now() - timedelta(minutes=1):
+                reset_entry.delete()
+                return Response(
+                    {"detail": "This reset code has expired."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            user.set_password(new_password)
+            user.save()
+
+            reset_entry.delete()
+
+            return Response({"detail": "Password has been reset successfully."})
+
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"detail": "Invalid email."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        except PasswordResetCode.DoesNotExist:
+            return Response(
+                {"detail": "Invalid or expired reset code."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

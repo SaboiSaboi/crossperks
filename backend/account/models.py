@@ -11,6 +11,7 @@ from django.contrib.auth.models import (
 )
 import boto3
 from django.utils.timezone import now
+from django.contrib.auth import get_user_model
 
 
 class CustomUserManager(BaseUserManager):
@@ -189,3 +190,13 @@ class Perk(models.Model):
 
     def __str__(self):
         return f"{self.description} (From {self.business.official_name})"
+
+
+class PasswordResetCode(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Reset code for {self.user.email}"

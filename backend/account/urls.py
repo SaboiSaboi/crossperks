@@ -10,6 +10,8 @@ from .views import (
     EndCampaignView,
     GetUserAPIView,
     LoginView,
+    ResetPasswordAPIView,
+    SendResetCodeAPIView,
     SendVerificationCodeView,
     UpdateNameView,
     UserPerkView,
@@ -42,11 +44,15 @@ urlpatterns = [
     ),
     path("perk/", UserPerkView.as_view(), name="get-a-perk"),
     path("onboarding/", BusinessOnboardingView.as_view(), name="onboarding-user"),
-    path("customer-onboarding/", CustomerOnboardingView.as_view(), name="onboarding-user"),
+    path(
+        "customer-onboarding/", CustomerOnboardingView.as_view(), name="onboarding-user"
+    ),
     path(
         "perks/<int:campaign_id>/end/", EndCampaignView.as_view(), name="end_campaign"
     ),
     path("businesses/", BusinessProfileListView.as_view(), name="business-list"),
     path("identifiers/", BusinessIdentifierListView.as_view(), name="identifier-list"),
-     path("update-name/", UpdateNameView.as_view(), name="update-name"),
+    path("update-name/", UpdateNameView.as_view(), name="update-name"),
+    path("send-reset-code/", SendResetCodeAPIView.as_view(), name="send-reset-code"),
+    path("reset-password/", ResetPasswordAPIView.as_view(), name="reset-password"),
 ]
