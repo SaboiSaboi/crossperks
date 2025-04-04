@@ -2,9 +2,7 @@
   <div
     class="min-h-screen flex flex-col items-center justify-center px-4 bg-gray-50"
   >
-    <NuxtLink to="/" class="text-3xl font-bold mb-6 text-blue-600"
-      >CrossPerks</NuxtLink
-    >
+    <NuxtLink to="/" class="text-3xl font-bold mb-6">CrossPerks</NuxtLink>
 
     <div class="w-full max-w-md bg-white shadow-lg rounded-2xl p-6 space-y-6">
       <h2 class="text-2xl font-semibold text-gray-800 text-center">

@@ -5,7 +5,6 @@
     <NuxtLink to="/" class="text-3xl font-bold mb-6">CrossPerks</NuxtLink>
     <h2 class="text-4xl mb-10">Create an Account</h2>
 
-    <!-- Form Section -->
     <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
       <form @submit.prevent="handleSubmit">
         <div v-if="selected === 'customer' || selected === 'business'">
@@ -241,7 +240,6 @@ const emailError = computed(() => {
   return result.success ? "" : result.error.issues[0].message;
 });
 
-// Password rules (live)
 const passwordRules = computed(() => ({
   length: userPassword.value.length >= 8,
   uppercase: /[A-Z]/.test(userPassword.value),
@@ -249,7 +247,6 @@ const passwordRules = computed(() => ({
   special: /[^a-zA-Z0-9]/.test(userPassword.value),
 }));
 
-// Registration schema (Zod)
 const registrationSchema = z
   .object({
     userName: z
@@ -285,7 +282,6 @@ const isRegistrationValid = computed(
   () => Object.keys(registrationErrors.value).length === 0
 );
 
-// Live update password error message as user types
 watch(userPassword, () => {
   const result = registrationSchema.safeParse({
     userName: userName.value || "placeholder",
