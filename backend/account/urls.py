@@ -7,6 +7,7 @@ from .views import (
     ClaimBusinessView,
     CreatePerkView,
     CustomerOnboardingView,
+    DeleteAccountView,
     EndCampaignView,
     GetUserAPIView,
     LoginView,
@@ -54,5 +55,6 @@ urlpatterns = [
     path("identifiers/", BusinessIdentifierListView.as_view(), name="identifier-list"),
     path("update-name/", UpdateNameView.as_view(), name="update-name"),
     path("send-reset-code/", SendResetCodeAPIView.as_view(), name="send-reset-code"),
+    path("delete-account/", DeleteAccountView.as_view(), name="delete-account"),
     path("reset-password/", ResetPasswordAPIView.as_view(), name="reset-password"),
 ]

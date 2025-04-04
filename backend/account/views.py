@@ -28,6 +28,7 @@ from django.contrib.auth import authenticate
 from knox.auth import TokenAuthentication
 from rest_framework.generics import CreateAPIView
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
 
 
 class SendVerificationCodeView(APIView):
@@ -603,8 +604,6 @@ class ResetPasswordAPIView(APIView):
         code = request.data.get("code")
         new_password = request.data.get("new_password")
 
-        print("done...", email, code, new_password)
-
         if not all([email, code, new_password]):
             return Response(
                 {"detail": "Email, code, and new password are required."},
@@ -614,8 +613,8 @@ class ResetPasswordAPIView(APIView):
             user = CustomUser.objects.get(email=email, is_verified=True)
 
             reset_entry = PasswordResetCode.objects.get(user=user, code=code)
-            print("user", reset_entry.updated_at)
-            if reset_entry.updated_at < timezone.now() - timedelta(minutes=1):
+
+            if reset_entry.updated_at < timezone.now() - timedelta(minutes=10):
                 reset_entry.delete()
                 return Response(
                     {"detail": "This reset code has expired."},
@@ -645,3 +644,21 @@ class ResetPasswordAPIView(APIView):
                 {"detail": "Invalid or expired reset code."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        timestamp = now().strftime("%Y%m%d%H%M%S")
+        new_email = f"{user.email}_deleted_{timestamp}"
+
+        user.email = new_email
+        user.deleted = True
+        user.is_active = False  # Optional: deactivate login
+        user.save()
+
+        return Response(
+            {"detail": "Account deleted."}, status=status.HTTP_204_NO_CONTENT
+        )
