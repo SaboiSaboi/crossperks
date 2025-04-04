@@ -33,7 +33,7 @@
           {{ touched.password ? formErrors.password : "" }}
         </p>
         <div class="text-black mb-4 underline w-fit text-sm">
-          <NuxtLink to="/forgot-password"> Forgot Password </NuxtLink>
+          <NuxtLink to="/forgotpassword"> Forgot Password </NuxtLink>
         </div>
 
         <button
