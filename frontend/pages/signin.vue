@@ -29,9 +29,12 @@
           v-model="password"
           @blur="markTouched('password')"
         />
-        <p class="text-red-500 text-sm h-5 mb-5">
+        <p class="text-red-500 text-sm h-5 mb-1">
           {{ touched.password ? formErrors.password : "" }}
         </p>
+        <div class="text-black mb-4 underline w-fit text-sm">
+          <NuxtLink to="/forgot-password"> Forgot Password </NuxtLink>
+        </div>
 
         <button
           :disabled="!email || !password"
@@ -78,6 +81,7 @@
 import { ref } from "vue";
 import { z } from "zod";
 import { toast } from "@/components/ui/toast";
+import { NuxtLink } from "#components";
 
 const authStore = useAuthS();
 
