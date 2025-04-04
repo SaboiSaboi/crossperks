@@ -586,7 +586,6 @@ class SendResetCodeAPIView(APIView):
                 recipient_list=[email],
             )
 
-        # ✅ Always respond the same
         return Response(
             {
                 "detail": f"If an account exists for {email}, we’ve sent a password reset link."
@@ -627,8 +626,15 @@ class ResetPasswordAPIView(APIView):
             user.save()
 
             reset_entry.delete()
+            _, token = AuthToken.objects.create(user)
 
-            return Response({"detail": "Password has been reset successfully."})
+            return Response(
+                {
+                    "message": "Password has been reset successfully.",
+                    "auth_token": token,
+                },
+                status=status.HTTP_200_OK,
+            )
 
         except CustomUser.DoesNotExist:
             return Response(
