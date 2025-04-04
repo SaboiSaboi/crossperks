@@ -132,9 +132,9 @@ const completeOnboarding = async () => {
   >
     <Card class="w-full max-w-lg shadow-lg">
       <CardHeader>
-        <CardTitle class="text-2xl text-center"
-          >Tell Us What Businesses You Support</CardTitle
-        >
+        <CardTitle class="text-2xl text-center">
+          Tell Us What Businesses You Support
+        </CardTitle>
         <CardDescription class="text-center">
           Select business categories you’d like to support.
         </CardDescription>
@@ -147,15 +147,13 @@ const completeOnboarding = async () => {
             <div class="grid grid-cols-2 gap-2 mt-2">
               <label
                 v-for="identifier in allIdentifiers"
-                :key="identifier.id"
+                :key="identifier.slug"
                 class="flex items-center space-x-2"
               >
-                <input
-                  type="checkbox"
-                  :value="identifier.id"
-                  v-model="selectedIdentifiers"
-                  class="rounded border-gray-300"
-                />
+                <input type="checkbox" :value="identifier.slug" />
+                v-model="selectedIdentifiers"
+                <!-- ✅ Holds slugs -->
+                class="rounded border-gray-300" />
                 <span>{{ identifier.name }}</span>
               </label>
             </div>
@@ -168,7 +166,7 @@ const completeOnboarding = async () => {
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import {
@@ -183,26 +181,26 @@ import { Label } from "@/components/ui/label";
 
 const router = useRouter();
 const { handleCheckAuth } = useAuthS();
-const allIdentifiers = ref([]);
-const selectedIdentifiers = ref([]);
+
+const allIdentifiers = ref<{ id: number; name: string; slug: string }[]>([]);
+const selectedIdentifiers = ref<string[]>([]); // ✅ should store slugs
 
 onMounted(async () => {
   try {
-    const user = await handleCheckAuth();
+    const user: any = await handleCheckAuth();
 
     // Fetch all available business identifiers
-    const response = await $fetch("http://localhost:8000/account/identifiers/");
+    const response: any = await $fetch(
+      "http://localhost:8000/account/identifiers/"
+    );
     allIdentifiers.value = response;
 
-    // Fetch the customer's selected preferences
+    // Pre-fill selected slugs
     if (user.customer_profile?.preferred_identifiers) {
-      selectedIdentifiers.value =
-        user.customer_profile.preferred_identifiers.map(
-          (identifier) => identifier.id
-        );
+      selectedIdentifiers.value = user.customer_profile.preferred_identifiers; // ✅ expects slugs
     }
   } catch (error) {
-    console.error("Error fetching identifiers:", error);
+    console.error("Error during onboarding setup:", error);
   }
 });
 
@@ -216,7 +214,7 @@ const completeCustomerOnboarding = async () => {
         Authorization: `Token ${token.value}`,
       },
       body: {
-        preferred_identifiers: selectedIdentifiers.value, // ✅ Send IDs instead of names
+        preferred_identifiers: selectedIdentifiers.value, // ✅ Slugs only
       },
     });
 
