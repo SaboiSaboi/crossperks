@@ -199,13 +199,13 @@ onMounted(async () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent class="w-56">
                   <DropdownMenuLabel class="flex justify-center"
-                    >Edit Campaign</DropdownMenuLabel
+                    >Edit Campaign?</DropdownMenuLabel
                   >
                   <DropdownMenuSeparator />
                   <Button variant="ghost" class="flex justify-center w-full">
                     <AlertDialog>
                       <AlertDialogTrigger as-child>
-                        <span> End </span>
+                        <span> Continue </span>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
