@@ -100,6 +100,46 @@ class VerifyCodeView(APIView):
             )
 
 
+class UpdateFlyerView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user = request.user
+        flyerMessage = request.data.get("flyerMessage")
+        flyerHeadline = request.data.get("flyerHeadline")
+        official_name = request.data.get("official_name")
+
+        print(flyerMessage, flyerHeadline, official_name)
+
+        if not flyerHeadline or not flyerMessage or not official_name:
+            return Response(
+                {"error": "Missing flyer-message, flyer-headline, business name."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        normalized_official_name = " ".join(
+            word.capitalize() for word in official_name.strip().split()
+        )
+
+        try:
+            profile = user.business_profile  # Access the related BusinessProfile
+        except Exception:
+            return Response(
+                {"error": "Business profile not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        profile.official_name = normalized_official_name
+        profile.flyerMessage = flyerMessage
+        profile.flyerHeadline = flyerHeadline
+        profile.save()
+
+        return Response(
+            {"message": "Flyer updated successfully."},
+            status=status.HTTP_200_OK,
+        )
+
+
 class UpdateNameView(APIView):
     permission_classes = [IsAuthenticated]
 
