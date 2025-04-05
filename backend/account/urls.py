@@ -46,7 +46,7 @@ urlpatterns = [
     path("perk/", UserPerkView.as_view(), name="get-a-perk"),
     path("onboarding/", BusinessOnboardingView.as_view(), name="onboarding-user"),
     path(
-        "customer-onboarding/", CustomerOnboardingView.as_view(), name="onboarding-user"
+        "customer-onboarding/", CustomerOnboardingView.as_view(), name="customer-user"
     ),
     path(
         "perks/<int:campaign_id>/end/", EndCampaignView.as_view(), name="end_campaign"
