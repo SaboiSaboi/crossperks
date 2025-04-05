@@ -44,7 +44,6 @@ const business = ref<BusinessProfile>({
 onMounted(async () => {
   const { handleCheckAuth } = useAuthS();
   const business_user: any = await handleCheckAuth();
-  console.log("res", business_user);
   const parsed = BusinessProfileSchema.safeParse(
     business_user.business_profile
   );
@@ -62,13 +61,15 @@ const printFlyer = () => {
 const saveEdits = async () => {
   const token = useCookie("auth_token");
 
-  await $fetch("http://localhost:8000/account/onboarding/", {
+  await $fetch("http://localhost:8000/account/update-flyer/", {
     method: "PUT",
     headers: {
       Authorization: `Token ${token.value}`,
     },
     body: {
-      ...business.value,
+      flyerHeadline: business.value.flyerHeadline,
+      flyerMessage: business.value.flyerMessage,
+      official_name: business.value.official_name,
     },
   });
 

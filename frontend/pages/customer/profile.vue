@@ -22,7 +22,6 @@ const joinedDate = ref("");
 const editing = ref(false);
 const editingName = ref(false);
 const newName = ref("");
-const showMenu = ref(false);
 
 const token = useCookie("auth_token");
 

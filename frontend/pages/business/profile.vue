@@ -9,14 +9,14 @@
       <Card class="w-full px-0 h-fit no-print">
         <CardHeader class="border-b pb-4">
           <CardTitle class="text-xl font-semibold">
-            {{ business.official_name }} Profile
+            {{ business.official_name }}
           </CardTitle>
         </CardHeader>
         <CardContent class="mt-4 flex flex-col sm:flex-row gap-6">
           <div class="sm:w-1/2 flex flex-col relative">
             <div class="flex gap-2">
               <div>Basic Information</div>
-              <div>
+              <button>
                 <Dialog v-model:open="isOpen">
                   <DialogTrigger as-child>
                     <svg
@@ -168,7 +168,7 @@
                     </form>
                   </DialogContent>
                 </Dialog>
-              </div>
+              </button>
             </div>
             <hr class="my-2" />
             <div>
