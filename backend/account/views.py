@@ -28,6 +28,7 @@ from django.contrib.auth import authenticate
 from knox.auth import TokenAuthentication
 from rest_framework.generics import CreateAPIView
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
 
 
 class SendVerificationCodeView(APIView):
@@ -142,6 +143,7 @@ class CompleteRegistrationView(generics.CreateAPIView):
                     )
 
                 user.name = cus_name
+                user.is_active = True
                 user.set_password(password)
                 user.save()
 
@@ -323,6 +325,7 @@ class ClaimBusinessView(APIView):
 
 
 class LoginView(APIView):
+    print("we are in the login")
     authentication_classes = []
     permission_classes = [AllowAny]
 
@@ -330,10 +333,13 @@ class LoginView(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
 
+        print("the email and password are", email, password)
+
         if not email or not password:
             return Response({"error": "Email and password are required."}, status=400)
 
         user = authenticate(request, username=email, password=password)
+        print("we found the user, and is  ", user)
         if user is None:
             return Response({"error": "Invalid email or password."}, status=400)
 
@@ -442,22 +448,59 @@ class CreatePerkView(CreateAPIView):
         serializer.save(business=business)
 
 
+# class CustomerOnboardingView(generics.UpdateAPIView):
+#     print("we in the customer onboarding logic")
+#     permission_classes = [IsAuthenticated]
+
+#     def put(self, request, *args, **kwargs):
+#         print("we in the customer onboarding logic")
+#         customer_profile = CustomerProfile.objects.get_or_create(user=request.user)
+#         serializer = CustomerProfileSerializer(
+#             customer_profile, data=request.data, partial=True
+#         )
+
+#         if serializer.is_valid():
+#             serializer.save()
+#             request.user.is_onboarded = True
+#             request.user.save()
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class CustomerOnboardingView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, *args, **kwargs):
-        customer_profile = CustomerProfile.objects.get_or_create(user=request.user)
-        serializer = CustomerProfileSerializer(
-            customer_profile, data=request.data, partial=True
-        )
+        print("PUT request hit CustomerOnboardingView")
+        try:
+            customer_profile, _ = CustomerProfile.objects.get_or_create(
+                user=request.user
+            )
+            print("customer_profile collected", customer_profile)
 
-        if serializer.is_valid():
-            serializer.save()
-            request.user.is_onboarded = True
-            request.user.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            serializer = CustomerProfileSerializer(
+                customer_profile, data=request.data, partial=True
+            )
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            print("collected serializer func")
+
+            if serializer.is_valid():
+                print("in the valid", serializer)
+                serializer.save()
+                request.user.is_onboarded = True
+                request.user.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            logger.error("❌ Serializer errors: %s", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            logger.exception("🔥 Exception in CustomerOnboardingView PUT")
+            return Response(
+                {"detail": "Internal server error."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class BusinessOnboardingView(generics.UpdateAPIView):
@@ -603,8 +646,6 @@ class ResetPasswordAPIView(APIView):
         code = request.data.get("code")
         new_password = request.data.get("new_password")
 
-        print("done...", email, code, new_password)
-
         if not all([email, code, new_password]):
             return Response(
                 {"detail": "Email, code, and new password are required."},
@@ -614,8 +655,8 @@ class ResetPasswordAPIView(APIView):
             user = CustomUser.objects.get(email=email, is_verified=True)
 
             reset_entry = PasswordResetCode.objects.get(user=user, code=code)
-            print("user", reset_entry.updated_at)
-            if reset_entry.updated_at < timezone.now() - timedelta(minutes=1):
+
+            if reset_entry.updated_at < timezone.now() - timedelta(minutes=10):
                 reset_entry.delete()
                 return Response(
                     {"detail": "This reset code has expired."},
@@ -645,3 +686,21 @@ class ResetPasswordAPIView(APIView):
                 {"detail": "Invalid or expired reset code."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        timestamp = now().strftime("%Y%m%d%H%M%S")
+        new_email = f"{user.email}_deleted_{timestamp}"
+
+        user.email = new_email
+        user.deleted = True
+        user.is_active = False  # Optional: deactivate login
+        user.save()
+
+        return Response(
+            {"detail": "Account deleted."}, status=status.HTTP_204_NO_CONTENT
+        )

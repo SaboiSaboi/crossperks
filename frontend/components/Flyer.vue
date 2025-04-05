@@ -14,8 +14,8 @@ const BusinessProfileSchema = z.object({
   is_claimed: z.boolean(),
   qr_code: z.string(),
   website: z.string(),
-  flyerMessage: z.string(),
-  flyerHeadline: z.string(),
+  flyerMessage: z.string().nullable(),
+  flyerHeadline: z.string().nullable(),
   created_at: z.string(),
   identifiers: z.array(z.string()),
   phone: z.string(),
@@ -50,17 +50,6 @@ onMounted(async () => {
   );
   if (parsed.success) {
     business.value = parsed.data;
-
-    const saved = localStorage.getItem("flyerData");
-    if (saved) {
-      const parsedFlyer = JSON.parse(saved);
-      business.value.flyerMessage =
-        parsedFlyer.perkMessage || business.value.flyerMessage;
-      business.value.flyerHeadline =
-        parsedFlyer.headline || business.value.flyerHeadline;
-      business.value.official_name =
-        parsedFlyer.official_name || business.value.official_name;
-    }
   } else {
     console.error("Business profile data is invalid:", parsed.error);
   }
@@ -118,7 +107,7 @@ const saveEdits = async () => {
           hasEdits = true;
         "
       >
-        {{ business.flyerMessage }}
+        {{ business.flyerMessage ?? "E.g Thanks for coming. Call again!" }}
       </p>
 
       <p
@@ -129,7 +118,7 @@ const saveEdits = async () => {
           hasEdits = true;
         "
       >
-        {{ business.flyerHeadline }}
+        {{ business.flyerHeadline ?? "E.g. Buy Item at 20% off discount." }}
       </p>
 
       <img

@@ -56,10 +56,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         max_length=10, choices=USER_TYPE_CHOICES, default="customer"
     )
 
+    deleted = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
     is_verified = models.BooleanField(default=False)
+
     is_onboarded = models.BooleanField(default=False)
     verification_code = models.CharField(max_length=6, blank=True, null=True)
     date_joined = models.DateTimeField(auto_now_add=True)

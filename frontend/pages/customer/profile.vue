@@ -8,7 +8,9 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const { handleCheckAuth } = useAuthS();
 
 const userName = ref("User");
@@ -20,6 +22,7 @@ const joinedDate = ref("");
 const editing = ref(false);
 const editingName = ref(false);
 const newName = ref("");
+const showMenu = ref(false);
 
 const token = useCookie("auth_token");
 
@@ -41,9 +44,7 @@ const updateName = async () => {
       headers: {
         Authorization: `Token ${token.value}`,
       },
-      body: {
-        name: newName.value,
-      },
+      body: { name: newName.value },
     });
     userName.value = newName.value;
     editingName.value = false;
@@ -59,9 +60,7 @@ const updatePreferences = async () => {
       headers: {
         Authorization: `Token ${token.value}`,
       },
-      body: {
-        preferred_identifiers: selectedIdentifiers.value,
-      },
+      body: { preferred_identifiers: selectedIdentifiers.value },
     });
 
     preferredIdentifiers.value = allIdentifiers.value
@@ -71,6 +70,23 @@ const updatePreferences = async () => {
     editing.value = false;
   } catch (err) {
     console.error("Failed to update preferences", err);
+  }
+};
+
+const deleteAccount = async () => {
+  try {
+    await $fetch("http://localhost:8000/account/delete-account/", {
+      method: "DELETE",
+      headers: {
+        Authorization: `Token ${token.value}`,
+      },
+    });
+
+    token.value = null;
+    router.replace("/signin");
+  } catch (err) {
+    console.error("Failed to delete account", err);
+    alert("Something went wrong while deleting your account.");
   }
 };
 
@@ -87,7 +103,6 @@ onMounted(async () => {
     joinedDate.value = new Date(
       userData.user?.created_at || Date.now()
     ).toISOString();
-
     await fetchIdentifiers();
 
     selectedIdentifiers.value = allIdentifiers.value
@@ -198,8 +213,64 @@ const formattedDate = computed(() => {
           </div>
         </CardContent>
 
-        <CardFooter class="text-sm text-muted-foreground border-t pt-4">
+        <CardFooter
+          class="text-sm text-muted-foreground border-t pt-4 flex justify-between items-center relative"
+        >
           <p>Joined on {{ formattedDate }}</p>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="ghost">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                  />
+                </svg>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent class="w-56">
+              <DropdownMenuLabel class="flex justify-center"
+                >Delete Account?</DropdownMenuLabel
+              >
+              <DropdownMenuSeparator />
+              <Button variant="ghost" class="flex justify-center w-full">
+                <AlertDialog>
+                  <AlertDialogTrigger as-child>
+                    <span> Continue </span>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle
+                        >Are you sure you want to delete your
+                        account?</AlertDialogTitle
+                      >
+                      <AlertDialogDescription>
+                        This action will permanently delete your account on
+                        CrossPerks. It cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        @click="deleteAccount"
+                        class="bg-red-400 hover:bg-red-600"
+                        >Continue</AlertDialogAction
+                      >
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </Button>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </CardFooter>
       </Card>
     </div>

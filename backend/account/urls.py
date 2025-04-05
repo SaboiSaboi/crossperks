@@ -7,6 +7,7 @@ from .views import (
     ClaimBusinessView,
     CreatePerkView,
     CustomerOnboardingView,
+    DeleteAccountView,
     EndCampaignView,
     GetUserAPIView,
     LoginView,
@@ -45,7 +46,7 @@ urlpatterns = [
     path("perk/", UserPerkView.as_view(), name="get-a-perk"),
     path("onboarding/", BusinessOnboardingView.as_view(), name="onboarding-user"),
     path(
-        "customer-onboarding/", CustomerOnboardingView.as_view(), name="onboarding-user"
+        "customer-onboarding/", CustomerOnboardingView.as_view(), name="customer-user"
     ),
     path(
         "perks/<int:campaign_id>/end/", EndCampaignView.as_view(), name="end_campaign"
@@ -54,5 +55,6 @@ urlpatterns = [
     path("identifiers/", BusinessIdentifierListView.as_view(), name="identifier-list"),
     path("update-name/", UpdateNameView.as_view(), name="update-name"),
     path("send-reset-code/", SendResetCodeAPIView.as_view(), name="send-reset-code"),
+    path("delete-account/", DeleteAccountView.as_view(), name="delete-account"),
     path("reset-password/", ResetPasswordAPIView.as_view(), name="reset-password"),
 ]

@@ -203,7 +203,7 @@
                 {{ business.category }}
               </p>
             </div>
-            <div>
+            <div class="mb-4">
               <span class="text-sm text-gray-500">Identifiers</span>
               <p class="text-lg mt-1">
                 <span v-if="business.identifiers.length">
@@ -212,14 +212,65 @@
                 <span v-else class="italic text-gray-400">None selected</span>
               </p>
             </div>
-            <hr class="my-2" />
 
-            <div>
-              <p v-if="business.is_claimed" class="text-green-500">
-                Verified ✔️
-              </p>
-              <p v-else class="h-5 bg-slate-300"></p>
+            <div
+              class="text-sm text-muted-foreground border-t pt-4 flex justify-between items-center relative"
+            >
               <p>Joined on {{ formattedDate }}</p>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                  <Button variant="ghost">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      class="size-6"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                      />
+                    </svg>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent class="w-56">
+                  <DropdownMenuLabel class="flex justify-center"
+                    >Delete Account?</DropdownMenuLabel
+                  >
+                  <DropdownMenuSeparator />
+                  <Button variant="ghost" class="flex justify-center w-full">
+                    <AlertDialog>
+                      <AlertDialogTrigger as-child>
+                        <span> Continue </span>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle
+                            >Are you sure you want to delete your
+                            account?</AlertDialogTitle
+                          >
+                          <AlertDialogDescription>
+                            This action will permanently delete your account on
+                            CrossPerks. It cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            @click="deleteAccount"
+                            class="bg-red-400 hover:bg-red-600"
+                            >Continue</AlertDialogAction
+                          >
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </Button>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
@@ -239,6 +290,8 @@
 import { ref, computed, onMounted } from "vue";
 import { z } from "zod";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useRouter } from "vue-router";
+
 const allIdentifiers = ref<any>([]);
 const isOpen = ref(false);
 const errorMessages = ref<Record<string, string>>({});
@@ -351,6 +404,25 @@ onMounted(async () => {
     console.error("Business profile data is invalid:", parsed.error);
   }
 });
+const token = useCookie("auth_token");
+const router = useRouter();
+
+const deleteAccount = async () => {
+  try {
+    await $fetch("http://localhost:8000/account/delete-account/", {
+      method: "DELETE",
+      headers: {
+        Authorization: `Token ${token.value}`,
+      },
+    });
+
+    token.value = null;
+    router.replace("/signin");
+  } catch (err) {
+    console.error("Failed to delete account", err);
+    alert("Something went wrong while deleting your account.");
+  }
+};
 </script>
 
 <style scoped>

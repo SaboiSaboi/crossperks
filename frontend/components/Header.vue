@@ -50,6 +50,12 @@ const navLinks = computed(() => [
 ]);
 
 const isActive = (path: string) => route.path === path;
+const handleLogout = async () => {
+  // call logout logic
+  await logout(); // assume this clears tokens or session
+
+  navigateTo("/signin"); // navigate after logout is complete
+};
 </script>
 
 <template>
@@ -143,9 +149,9 @@ const isActive = (path: string) => route.path === path;
                       : 'text-slate-200 hover:text-slate-50 hover:underline'
                   "
                 >
-                  <a
-                    href="/signin"
-                    @click="logout"
+                  <button
+                    to="/signin"
+                    @click="handleLogout"
                     class="hover:underline text-xl"
                     v-show="link.name === 'Logout'"
                   >
@@ -163,7 +169,7 @@ const isActive = (path: string) => route.path === path;
                         d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
                       />
                     </svg>
-                  </a>
+                  </button>
                   <span v-if="link.name === 'Logout'"></span>
 
                   <span
